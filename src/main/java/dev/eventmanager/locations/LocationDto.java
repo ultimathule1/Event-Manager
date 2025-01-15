@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public record LocationDto(
-        Long i,
+        Long id,
         @NotBlank(message = "name should not be empty")
         String name,
         @NotBlank(message = "address should not be empty")
