@@ -10,4 +10,6 @@ public interface LocationRepository extends JpaRepository<LocationEntity, Long> 
 
     @NonNull
     List<LocationEntity> findAll();
+
+    LocationEntity getLocationEntityById(Long id);
 }
