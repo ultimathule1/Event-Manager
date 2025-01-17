@@ -18,6 +18,21 @@ public class GlobalExceptionHandler {
 
     Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Object> handleCommonException(Exception ex) {
+        log.error(ex.getMessage(), ex);
+
+        ErrorMessage errorMessage = new ErrorMessage(
+                "Internal server error",
+                ex.getMessage(),
+                LocalDateTime.now()
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(errorMessage);
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorMessage> handleValidationException(MethodArgumentNotValidException ex) {
 
