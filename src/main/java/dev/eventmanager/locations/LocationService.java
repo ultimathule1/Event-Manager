@@ -16,33 +16,32 @@ public class LocationService {
         this.locationEntityMapper = locationEntityMapper;
     }
 
-    List<Location> getAllLocations() {
+    public List<Location> getAllLocations() {
         return locationRepository.findAll()
                 .stream()
                 .map(locationEntityMapper::toDomain)
                 .toList();
     }
 
-    Location createLocation(Location location) {
-        checkIsLocationIdNotNull(location.id());
+    public Location createLocation(Location location) {
+        checkIsLocationIdNull(location.id());
         var locationEntity = locationEntityMapper.toEntity(location);
         return locationEntityMapper.toDomain(locationRepository.save(locationEntity));
     }
 
-    void deleteLocation(Long locationId) {
+    public void deleteLocation(Long locationId) {
         checkLocationExists(locationId);
         locationRepository.deleteById(locationId);
     }
 
-    Location getLocationById(Long locationId) {
+    public Location getLocationById(Long locationId) {
         checkLocationExists(locationId);
 
         return locationEntityMapper.toDomain(locationRepository.getLocationEntityById(locationId));
     }
 
-    Location fullUpdateLocation(Long locationId, Location updatedLocation) {
-        checkIsLocationIdNotNull(updatedLocation.id());
-        checkLocationExists(locationId);
+    public Location updateLocation(Long locationId, Location updatedLocation) {
+        checkIsLocationIdNull(updatedLocation.id());
 
         if (getLocationById(locationId).capacity() > updatedLocation.capacity()) {
             throw new IllegalArgumentException(
@@ -64,7 +63,7 @@ public class LocationService {
         }
     }
 
-    private void checkIsLocationIdNotNull(Long locationId) {
+    private void checkIsLocationIdNull(Long locationId) {
         if (locationId != null) {
             throw new IllegalArgumentException("Location id must be null");
         }

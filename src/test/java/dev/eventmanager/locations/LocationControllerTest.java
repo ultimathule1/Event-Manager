@@ -39,6 +39,10 @@ public class LocationControllerTest extends StarterTest {
         Assertions.assertNotNull(locationDtoResponse.id());
         Assertions.assertTrue(locationRepository.existsById(locationDtoResponse.id()));
         Assertions.assertEquals(locationDtoResponse.name(), locationDto.name());
+        Assertions.assertEquals(locationDtoResponse.description(), locationDto.description());
+        Assertions.assertEquals(locationDtoResponse.address(), locationDto.address());
+        Assertions.assertEquals(locationDtoResponse.capacity(), locationDto.capacity());
+
     }
 
     @Test
@@ -128,7 +132,7 @@ public class LocationControllerTest extends StarterTest {
         );
 
         String locationDtoResponse =
-                mockMvc.perform(put("/locations?id=%s".formatted(createdLocation.id()))
+                mockMvc.perform(put("/locations/%s".formatted(createdLocation.id()))
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(locationToUpdate))
                         )
@@ -160,7 +164,7 @@ public class LocationControllerTest extends StarterTest {
                 "Спортивно-концертный комплекс в Санкт-Петербурге"
         );
 
-        mockMvc.perform(put("/locations?id=%s".formatted(createdLocation.id()))
+        mockMvc.perform(put("/locations/%s".formatted(createdLocation.id()))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(locationToUpdate))
         ).andExpect(status().is(HttpStatus.BAD_REQUEST.value()));

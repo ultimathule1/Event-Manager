@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -21,8 +20,8 @@ import java.util.List;
 @RequestMapping("/locations")
 public class LocationController {
 
-    Logger log = LoggerFactory.getLogger(LocationController.class);
-    LocationService locationService;
+    private static final Logger log = LoggerFactory.getLogger(LocationController.class);
+    private final LocationService locationService;
     LocationDtoMapper locationDtoMapper;
 
     public LocationController(LocationService locationService, LocationDtoMapper locationDtoMapper) {
@@ -31,12 +30,16 @@ public class LocationController {
     }
 
     @GetMapping
-    public List<LocationDto> getAllLocations() {
+    public ResponseEntity<List<LocationDto>> getAllLocations() {
         log.info("Received request to get all locations");
-        return locationService.getAllLocations()
-                .stream()
-                .map(l -> locationDtoMapper.toDto(l))
-                .toList();
+        return ResponseEntity
+                .ok()
+                .body(
+                        locationService.getAllLocations()
+                                .stream()
+                                .map(location -> locationDtoMapper.toDto(location))
+                                .toList()
+                );
     }
 
     @PostMapping
@@ -64,22 +67,28 @@ public class LocationController {
     }
 
     @GetMapping("/{locationId}")
-    public LocationDto getLocationById(
+    public ResponseEntity<LocationDto> getLocationById(
             @PathVariable long locationId
     ) {
         log.info("Received request to retrieve a location: locationId={}", locationId);
         Location location = locationService.getLocationById(locationId);
 
-        return locationDtoMapper.toDto(location);
+        return ResponseEntity
+                .ok()
+                .body(locationDtoMapper.toDto(location));
     }
 
-    @PutMapping()
-    public LocationDto updateLocation(
-            @RequestParam() long id,
+    @PutMapping("/{id}")
+    public ResponseEntity<LocationDto> updateLocation(
+            @PathVariable long id,
             @RequestBody @Valid LocationDto locationDto
     ) {
         log.info("Received request to update a location: id={}; locationDto={}", id, locationDto);
-        return locationDtoMapper.toDto(
-                locationService.fullUpdateLocation(id, locationDtoMapper.toDomain(locationDto)));
+        return ResponseEntity
+                .ok()
+                .body(locationDtoMapper.toDto(
+                                locationService.updateLocation(id, locationDtoMapper.toDomain(locationDto))
+                        )
+                );
     }
 }
