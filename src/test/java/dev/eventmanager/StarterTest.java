@@ -1,0 +1,49 @@
+package dev.eventmanager;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.event.ContextStoppedEvent;
+import org.springframework.context.event.EventListener;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.web.servlet.MockMvc;
+import org.testcontainers.containers.PostgreSQLContainer;
+
+@AutoConfigureMockMvc
+@SpringBootTest
+public class StarterTest {
+
+    @Autowired
+    protected MockMvc mockMvc;
+    @Autowired
+    protected ObjectMapper objectMapper;
+
+    private static volatile boolean isSharedSetupDone = false;
+
+    public static PostgreSQLContainer<?> POSTGRES_CONTAINER =
+            new PostgreSQLContainer<>("postgres:15.3")
+                    .withDatabaseName("postgres")
+                    .withUsername("postgres")
+                    .withPassword("root");
+
+    static {
+        if (!isSharedSetupDone) {
+            POSTGRES_CONTAINER.start();
+            isSharedSetupDone = true;
+        }
+    }
+
+    @DynamicPropertySource
+    static void datasourceProperties(DynamicPropertyRegistry registry) {
+        registry.add("test.postgres.port", POSTGRES_CONTAINER::getFirstMappedPort);
+    }
+
+    @EventListener
+    public void stopContainer(ContextStoppedEvent event) {
+        POSTGRES_CONTAINER.stop();
+    }
+
+
+}
