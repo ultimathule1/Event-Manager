@@ -1,4 +1,4 @@
-package dev.eventmanager.users;
+package dev.eventmanager.users.domain;
 
 public enum UserRole {
     ADMIN,

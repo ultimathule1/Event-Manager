@@ -1,4 +1,4 @@
-package dev.eventmanager.users;
+package dev.eventmanager.users.api;
 
 
 import jakarta.validation.constraints.Min;

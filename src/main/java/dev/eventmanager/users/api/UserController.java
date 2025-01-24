@@ -1,7 +1,8 @@
-package dev.eventmanager.users;
+package dev.eventmanager.users.api;
 
 import dev.eventmanager.security.AuthenticationService;
-import dev.eventmanager.security.jwt.JwtTokenResponse;
+import dev.eventmanager.users.domain.User;
+import dev.eventmanager.users.domain.UserService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

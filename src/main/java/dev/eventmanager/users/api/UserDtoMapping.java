@@ -1,5 +1,7 @@
-package dev.eventmanager.users;
+package dev.eventmanager.users.api;
 
+import dev.eventmanager.users.domain.User;
+import dev.eventmanager.users.domain.UserRole;
 import org.springframework.stereotype.Component;
 
 @Component

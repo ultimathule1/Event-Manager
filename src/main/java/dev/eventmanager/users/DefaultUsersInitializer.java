@@ -1,12 +1,15 @@
 package dev.eventmanager.users;
 
+import dev.eventmanager.users.db.UserEntity;
+import dev.eventmanager.users.db.UserRepository;
+import dev.eventmanager.users.domain.UserRole;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 @Component
-public class DefaultAddUsersStarter {
+public class DefaultUsersInitializer {
 
     private static final String DEFAULT_USER_LOGIN = "user";
     private static final String DEFAULT_USER_PASSWORD = "user";
@@ -16,7 +19,7 @@ public class DefaultAddUsersStarter {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public DefaultAddUsersStarter(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public DefaultUsersInitializer(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }

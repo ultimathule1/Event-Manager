@@ -1,4 +1,4 @@
-package dev.eventmanager.users;
+package dev.eventmanager.users.api;
 
 public record UserDto(
         Long id,

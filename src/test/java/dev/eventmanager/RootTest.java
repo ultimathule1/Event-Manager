@@ -1,7 +1,7 @@
 package dev.eventmanager;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dev.eventmanager.users.UserRole;
+import dev.eventmanager.users.domain.UserRole;
 import dev.eventmanager.users.UserTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;

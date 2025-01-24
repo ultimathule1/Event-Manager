@@ -1,7 +1,7 @@
 package dev.eventmanager.security;
 
-import dev.eventmanager.users.UserEntity;
-import dev.eventmanager.users.UserRepository;
+import dev.eventmanager.users.db.UserEntity;
+import dev.eventmanager.users.db.UserRepository;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

@@ -1,5 +1,8 @@
-package dev.eventmanager.users;
+package dev.eventmanager.users.domain;
 
+import dev.eventmanager.users.api.UserRegistration;
+import dev.eventmanager.users.db.UserEntity;
+import dev.eventmanager.users.db.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 

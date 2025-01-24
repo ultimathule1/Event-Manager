@@ -1,8 +1,8 @@
 package dev.eventmanager.security;
 
 import dev.eventmanager.security.jwt.JwtTokenManager;
-import dev.eventmanager.users.SignInRequest;
-import dev.eventmanager.users.UserRole;
+import dev.eventmanager.users.api.SignInRequest;
+import dev.eventmanager.users.domain.UserRole;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;

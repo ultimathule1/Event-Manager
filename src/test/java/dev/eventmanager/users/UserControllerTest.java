@@ -1,6 +1,11 @@
 package dev.eventmanager.users;
 
 import dev.eventmanager.RootTest;
+import dev.eventmanager.users.api.UserDto;
+import dev.eventmanager.users.api.UserRegistration;
+import dev.eventmanager.users.db.UserEntity;
+import dev.eventmanager.users.db.UserRepository;
+import dev.eventmanager.users.domain.UserRole;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

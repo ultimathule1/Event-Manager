@@ -1,6 +1,9 @@
 package dev.eventmanager.users;
 
 import dev.eventmanager.security.jwt.JwtTokenManager;
+import dev.eventmanager.users.db.UserEntity;
+import dev.eventmanager.users.db.UserRepository;
+import dev.eventmanager.users.domain.UserRole;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 

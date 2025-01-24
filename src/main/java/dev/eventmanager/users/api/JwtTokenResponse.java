@@ -1,4 +1,4 @@
-package dev.eventmanager.security.jwt;
+package dev.eventmanager.users.api;
 
 public record JwtTokenResponse (
         String jwt

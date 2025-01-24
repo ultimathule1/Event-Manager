@@ -1,6 +1,6 @@
 package dev.eventmanager.security.jwt;
 
-import dev.eventmanager.users.UserRole;
+import dev.eventmanager.users.domain.UserRole;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
