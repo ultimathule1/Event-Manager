@@ -1,5 +1,6 @@
 package dev.eventmanager.web;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,6 +85,4 @@ public class GlobalExceptionHandler {
                 status(HttpStatus.NOT_FOUND)
                 .body(errorMessage);
     }
-
-
 }

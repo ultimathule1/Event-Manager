@@ -12,6 +12,8 @@ public class UserService {
 
     private final PasswordEncoder passwordEncoder;
 
+    private final static String USER_NOT_FOUND = "User not found";
+
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
@@ -36,7 +38,14 @@ public class UserService {
 
     public User getUserById(Long id) {
         UserEntity user = userRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("User not found"));
+                .orElseThrow(() -> new NoSuchElementException(USER_NOT_FOUND));
+
+        return toDomain(user);
+    }
+
+    public User getUserByLogin(String login) {
+        UserEntity user = userRepository.findByLogin(login)
+                .orElseThrow(() -> new NoSuchElementException(USER_NOT_FOUND));
 
         return toDomain(user);
     }

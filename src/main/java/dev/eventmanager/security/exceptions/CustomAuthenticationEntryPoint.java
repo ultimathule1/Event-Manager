@@ -1,4 +1,4 @@
-package dev.eventmanager.security;
+package dev.eventmanager.security.exceptions;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.eventmanager.web.ErrorMessage;

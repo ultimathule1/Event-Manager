@@ -1,5 +1,7 @@
 package dev.eventmanager.users;
 
+import dev.eventmanager.security.AuthenticationService;
+import dev.eventmanager.security.jwt.JwtTokenResponse;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,17 +21,19 @@ public class UserController {
     private static final Logger log = LoggerFactory.getLogger(UserController.class);
     private final UserService userService;
     private final UserDtoMapping userDtoMapping;
+    private final AuthenticationService authenticationService;
 
-    public UserController(UserService userService, UserDtoMapping userDtoMapping) {
+    public UserController(UserService userService, UserDtoMapping userDtoMapping, AuthenticationService authenticationService) {
         this.userService = userService;
         this.userDtoMapping = userDtoMapping;
+        this.authenticationService = authenticationService;
     }
 
     @PostMapping
-    public ResponseEntity<UserDto> authenticate(
+    public ResponseEntity<UserDto> createUser(
             @RequestBody @Valid UserRegistration userRegistration
     ) {
-        log.info("Received request to authenticate user: login={}", userRegistration.login());
+        log.info("Received request to create user: userRegistration={}", userRegistration);
         var createdUser = userService.registerUser(userRegistration);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -46,5 +50,18 @@ public class UserController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(userDtoMapping.toDto(foundUser));
+    }
+
+    @GetMapping
+    @RequestMapping("/auth")
+    public ResponseEntity<JwtTokenResponse> authenticateUser(
+            @RequestBody SignInRequest signInRequest
+            ) {
+        log.info("Received request to authenticate user: SignInRequest={}", signInRequest);
+        User foundUser = userService.getUserByLogin(signInRequest.login());
+        String jwt = authenticationService.authenticate(signInRequest, foundUser.role());
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(new JwtTokenResponse(jwt));
     }
 }
