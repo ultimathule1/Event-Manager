@@ -36,6 +36,10 @@ public class UserService {
         return toDomain(savedUserEntity);
     }
 
+    public boolean existsByLogin(String login) {
+        return userRepository.existsByLogin(login);
+    }
+
     public User getUserById(Long id) {
         UserEntity user = userRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException(USER_NOT_FOUND));

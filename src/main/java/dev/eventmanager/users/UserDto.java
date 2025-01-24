@@ -1,9 +1,9 @@
 package dev.eventmanager.users;
 
-public record UserDto (
+public record UserDto(
         Long id,
         String login,
         int age,
         String role
-){
+) {
 }

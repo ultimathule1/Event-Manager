@@ -1,6 +1,5 @@
 package dev.eventmanager.security.jwt;
 
-import dev.eventmanager.users.User;
 import dev.eventmanager.users.UserRole;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;

@@ -1,6 +1,8 @@
 package dev.eventmanager;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.eventmanager.users.UserRole;
+import dev.eventmanager.users.UserTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -13,12 +15,14 @@ import org.testcontainers.containers.PostgreSQLContainer;
 
 @AutoConfigureMockMvc
 @SpringBootTest
-public class StarterTest {
+public class RootTest {
 
     @Autowired
     protected MockMvc mockMvc;
     @Autowired
     protected ObjectMapper objectMapper;
+    @Autowired
+    protected UserTestUtils userTestUtils;
 
     private static volatile boolean isSharedSetupDone = false;
 
@@ -40,10 +44,12 @@ public class StarterTest {
         registry.add("test.postgres.port", POSTGRES_CONTAINER::getFirstMappedPort);
     }
 
-    @EventListener
+    @EventListener(ContextStoppedEvent.class)
     public void stopContainer(ContextStoppedEvent event) {
         POSTGRES_CONTAINER.stop();
     }
 
-
+    public String getAuthorizationHeader(UserRole userRole) {
+        return "Bearer " + userTestUtils.getJwtToken(userRole);
+    }
 }

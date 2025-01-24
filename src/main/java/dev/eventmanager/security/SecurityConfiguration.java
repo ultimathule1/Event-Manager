@@ -9,11 +9,9 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -22,6 +20,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
 
 @Configuration
+@EnableMethodSecurity
 public class SecurityConfiguration {
 
     private final CustomUserDetails customUserDetails;
@@ -43,29 +42,26 @@ public class SecurityConfiguration {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorizeRequests ->
-                        authorizeRequests
-                                .requestMatchers(HttpMethod.POST, "/users")
-                                .permitAll()
-                                .requestMatchers(HttpMethod.GET,"/users/{id}")
-                                .hasAnyAuthority("ADMIN")
-                                .requestMatchers(HttpMethod.POST, "/users/auth")
-                                .permitAll()
+                                authorizeRequests
+                                        .requestMatchers(HttpMethod.POST, "/users")
+                                        .permitAll()
+                                        .requestMatchers(HttpMethod.GET, "/users/{id}")
+                                        .hasAnyAuthority("ADMIN")
+                                        .requestMatchers(HttpMethod.POST, "/users/auth")
+                                        .permitAll()
 
-                                .requestMatchers(HttpMethod.GET, "/locations/{id}")
-                                .hasAnyAuthority("ADMIN", "USER")
-                                .requestMatchers(HttpMethod.GET, "/locations")
-                                .hasAnyAuthority("ADMIN", "USER")
-                                .requestMatchers(HttpMethod.POST, "/locations")
-                                .hasAnyAuthority("ADMIN")
-                                .requestMatchers(HttpMethod.DELETE, "/locations/{id}")
-                                .hasAnyAuthority("ADMIN")
-                                .requestMatchers(HttpMethod.PUT, "/locations/")
-                                .hasAnyAuthority("ADMIN")
+                                        .requestMatchers(HttpMethod.GET, "/locations/{id}")
+                                        .hasAnyAuthority("ADMIN", "USER")
+                                        .requestMatchers(HttpMethod.GET, "/locations")
+                                        .hasAnyAuthority("ADMIN", "USER")
+                                        .requestMatchers(HttpMethod.POST, "/locations")
+                                        .hasAnyAuthority("ADMIN")
+//                                .requestMatchers(HttpMethod.DELETE, "/locations/{id}")
+//                                .hasAnyAuthority("ADMIN")
+                                        .requestMatchers(HttpMethod.PUT, "/locations/")
+                                        .hasAnyAuthority("ADMIN")
 
-//                                .requestMatchers(HttpMethod.GET, "/swagger-ui/*")
-//                                .permitAll()
-
-                                .anyRequest().authenticated()
+                                        .anyRequest().authenticated()
                 )
                 .exceptionHandling(exception -> {
                     exception
@@ -75,13 +71,6 @@ public class SecurityConfiguration {
                 .addFilterBefore(jwtTokenFilter, AnonymousAuthenticationFilter.class)
                 .build();
     }
-
-//    @Bean
-//    public WebSecurityCustomizer webSecurityCustomizer() {
-//        return web -> web.debug(true).ignoring()
-//                .requestMatchers("/css/**",
-//                        "/swagger-ui/**");
-//    }
 
     @Bean
     public AuthenticationManager authenticationManager(

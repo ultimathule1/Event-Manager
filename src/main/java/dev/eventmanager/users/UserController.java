@@ -56,7 +56,7 @@ public class UserController {
     @RequestMapping("/auth")
     public ResponseEntity<JwtTokenResponse> authenticateUser(
             @RequestBody SignInRequest signInRequest
-            ) {
+    ) {
         log.info("Received request to authenticate user: SignInRequest={}", signInRequest);
         User foundUser = userService.getUserByLogin(signInRequest.login());
         String jwt = authenticationService.authenticate(signInRequest, foundUser.role());

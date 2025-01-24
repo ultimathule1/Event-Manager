@@ -1,6 +1,6 @@
 package dev.eventmanager.users;
 
-public record SignInRequest (
+public record SignInRequest(
         String login,
         String password
 ) {
