@@ -13,6 +13,8 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.containers.PostgreSQLContainer;
 
+import java.security.SecureRandom;
+
 @AutoConfigureMockMvc
 @SpringBootTest
 public class RootTest {
@@ -23,6 +25,8 @@ public class RootTest {
     protected ObjectMapper objectMapper;
     @Autowired
     protected UserTestUtils userTestUtils;
+
+    protected final SecureRandom secureRandom = new SecureRandom();
 
     private static volatile boolean isSharedSetupDone = false;
 
@@ -51,5 +55,9 @@ public class RootTest {
 
     public String getAuthorizationHeader(UserRole userRole) {
         return "Bearer " + userTestUtils.getJwtToken(userRole);
+    }
+
+    public int getRandomInt() {
+        return secureRandom.nextInt();
     }
 }

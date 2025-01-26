@@ -3,10 +3,9 @@ package dev.eventmanager.users.domain;
 import dev.eventmanager.users.api.UserRegistration;
 import dev.eventmanager.users.db.UserEntity;
 import dev.eventmanager.users.db.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.NoSuchElementException;
 
 @Service
 public class UserService {
@@ -39,20 +38,16 @@ public class UserService {
         return toDomain(savedUserEntity);
     }
 
-    public boolean existsByLogin(String login) {
-        return userRepository.existsByLogin(login);
-    }
-
     public User getUserById(Long id) {
         UserEntity user = userRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException(USER_NOT_FOUND));
+                .orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
 
         return toDomain(user);
     }
 
     public User getUserByLogin(String login) {
         UserEntity user = userRepository.findByLogin(login)
-                .orElseThrow(() -> new NoSuchElementException(USER_NOT_FOUND));
+                .orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
 
         return toDomain(user);
     }

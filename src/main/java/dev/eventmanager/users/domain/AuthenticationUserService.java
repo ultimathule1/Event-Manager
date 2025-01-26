@@ -1,24 +1,27 @@
-package dev.eventmanager.security;
+package dev.eventmanager.users.domain;
 
 import dev.eventmanager.security.jwt.JwtTokenManager;
 import dev.eventmanager.users.api.SignInRequest;
-import dev.eventmanager.users.domain.UserRole;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 
 @Service
-public class AuthenticationService {
+public class AuthenticationUserService {
 
     private final AuthenticationManager authenticationManager;
     private final JwtTokenManager jwtTokenManager;
+    private final UserService userService;
 
-    public AuthenticationService(AuthenticationManager authenticationManager, JwtTokenManager jwtTokenManager) {
+    public AuthenticationUserService(AuthenticationManager authenticationManager, JwtTokenManager jwtTokenManager, UserService userService) {
         this.authenticationManager = authenticationManager;
         this.jwtTokenManager = jwtTokenManager;
+        this.userService = userService;
     }
 
-    public String authenticate(SignInRequest signInRequest, UserRole userRole) {
+    public String authenticate(SignInRequest signInRequest) {
+        var findUser = userService.getUserByLogin(signInRequest.login());
+
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         signInRequest.login(),
@@ -26,6 +29,6 @@ public class AuthenticationService {
                 )
         );
 
-        return jwtTokenManager.generateToken(signInRequest.login(), userRole);
+        return jwtTokenManager.generateToken(signInRequest.login(), findUser.role());
     }
 }

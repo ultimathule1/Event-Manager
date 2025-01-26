@@ -42,10 +42,15 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         String login = null;
         String role = null;
         try {
+            if (!jwtTokenManager.isTokenValid(jwtToken)) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+
             login = jwtTokenManager.getLoginByToken(jwtToken);
             role = jwtTokenManager.getRoleByToken(jwtToken);
         } catch (Exception e) {
-            log.error("Error while reading jwt", e);
+            log.error("Error while reading jwt. Invalid JWT", e);
             filterChain.doFilter(request, response);
         }
 

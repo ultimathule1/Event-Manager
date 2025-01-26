@@ -1,7 +1,7 @@
 package dev.eventmanager.security;
 
-import dev.eventmanager.security.exceptions.CustomAccessDeniedHandler;
-import dev.eventmanager.security.exceptions.CustomAuthenticationEntryPoint;
+import dev.eventmanager.security.exceptions.handlers.CustomAccessDeniedHandler;
+import dev.eventmanager.security.exceptions.handlers.CustomAuthenticationEntryPoint;
 import dev.eventmanager.security.jwt.JwtTokenFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -56,8 +56,6 @@ public class SecurityConfiguration {
                                         .hasAnyAuthority("ADMIN", "USER")
                                         .requestMatchers(HttpMethod.POST, "/locations")
                                         .hasAnyAuthority("ADMIN")
-//                                .requestMatchers(HttpMethod.DELETE, "/locations/{id}")
-//                                .hasAnyAuthority("ADMIN")
                                         .requestMatchers(HttpMethod.PUT, "/locations/")
                                         .hasAnyAuthority("ADMIN")
 

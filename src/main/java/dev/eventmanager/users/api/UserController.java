@@ -1,6 +1,6 @@
 package dev.eventmanager.users.api;
 
-import dev.eventmanager.security.AuthenticationService;
+import dev.eventmanager.users.domain.AuthenticationUserService;
 import dev.eventmanager.users.domain.User;
 import dev.eventmanager.users.domain.UserService;
 import jakarta.validation.Valid;
@@ -22,12 +22,12 @@ public class UserController {
     private static final Logger log = LoggerFactory.getLogger(UserController.class);
     private final UserService userService;
     private final UserDtoMapping userDtoMapping;
-    private final AuthenticationService authenticationService;
+    private final AuthenticationUserService authenticationUserService;
 
-    public UserController(UserService userService, UserDtoMapping userDtoMapping, AuthenticationService authenticationService) {
+    public UserController(UserService userService, UserDtoMapping userDtoMapping, AuthenticationUserService authenticationUserService) {
         this.userService = userService;
         this.userDtoMapping = userDtoMapping;
-        this.authenticationService = authenticationService;
+        this.authenticationUserService = authenticationUserService;
     }
 
     @PostMapping
@@ -56,11 +56,10 @@ public class UserController {
     @GetMapping
     @RequestMapping("/auth")
     public ResponseEntity<JwtTokenResponse> authenticateUser(
-            @RequestBody SignInRequest signInRequest
+            @RequestBody @Valid SignInRequest signInRequest
     ) {
         log.info("Received request to authenticate user: SignInRequest={}", signInRequest);
-        User foundUser = userService.getUserByLogin(signInRequest.login());
-        String jwt = authenticationService.authenticate(signInRequest, foundUser.role());
+        String jwt = authenticationUserService.authenticate(signInRequest);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(new JwtTokenResponse(jwt));

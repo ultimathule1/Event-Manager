@@ -1,6 +1,7 @@
 package dev.eventmanager.security.jwt;
 
 import dev.eventmanager.users.domain.UserRole;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,6 +22,24 @@ public class JwtTokenManager {
     ) {
         this.key = Keys.hmacShaKeyFor(key.getBytes());
         EXPIRATION_TIME = expirationTime;
+    }
+
+    public boolean isTokenValid(String token) {
+        try {
+            Date dateExpiration = Jwts.parser()
+                    .verifyWith(key)
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload()
+                    .getExpiration();
+
+            if (dateExpiration == null || dateExpiration.before(new Date())) {
+                return false;
+            }
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     public String generateToken(String subject, UserRole role) {

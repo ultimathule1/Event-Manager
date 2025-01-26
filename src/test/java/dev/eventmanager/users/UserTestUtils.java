@@ -14,8 +14,8 @@ public class UserTestUtils {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenManager jwtTokenManager;
 
-    private static final String DEFAULT_ADMIN_LOGIN = "admin";
-    private static final String DEFAULT_USER_LOGIN = "user";
+    private static final String DEFAULT_ADMIN_LOGIN = "admin2";
+    private static final String DEFAULT_USER_LOGIN = "user2";
     private static volatile boolean isUsersInitialized = false;
 
     public UserTestUtils(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtTokenManager jwtTokenManager) {
@@ -37,8 +37,8 @@ public class UserTestUtils {
     }
 
     private void initializeTestUsers() {
-        createUser(DEFAULT_ADMIN_LOGIN, 20, "admin", UserRole.ADMIN);
-        createUser(DEFAULT_USER_LOGIN, 20, "user", UserRole.USER);
+        createUser(DEFAULT_ADMIN_LOGIN, 20, "admin_admin", UserRole.ADMIN);
+        createUser(DEFAULT_USER_LOGIN, 20, "user_user", UserRole.USER);
     }
 
     private void createUser(

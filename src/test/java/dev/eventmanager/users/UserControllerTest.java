@@ -13,8 +13,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 public class UserControllerTest extends RootTest {
@@ -41,7 +41,7 @@ public class UserControllerTest extends RootTest {
         var createdDtoUser = objectMapper.readValue(createdUserJson, UserDto.class);
 
         Assertions.assertNotNull(createdDtoUser.id());
-        Assertions.assertEquals(userRegistration.login(),createdDtoUser.login());
+        Assertions.assertEquals(userRegistration.login(), createdDtoUser.login());
         Assertions.assertEquals(userRegistration.age(), createdDtoUser.age());
         Assertions.assertEquals(createdDtoUser.role(), UserRole.USER.name());
     }
@@ -74,7 +74,7 @@ public class UserControllerTest extends RootTest {
 
     private UserRegistration getDummyUserRegistration() {
         return new UserRegistration(
-                "vasya",
+                "vasya-" + getRandomInt(),
                 passwordEncoder.encode("vasya"),
                 33
         );
@@ -83,7 +83,7 @@ public class UserControllerTest extends RootTest {
     private UserEntity getDummyUserEntity(UserRole userRole) {
         return new UserEntity(
                 null,
-                "vasya",
+                "vasya-" + getRandomInt(),
                 28,
                 passwordEncoder.encode("vasya"),
                 userRole.name()
