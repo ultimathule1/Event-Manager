@@ -56,7 +56,9 @@ public class SecurityConfiguration {
                                         .hasAnyAuthority("ADMIN", "USER")
                                         .requestMatchers(HttpMethod.POST, "/locations")
                                         .hasAnyAuthority("ADMIN")
-                                        .requestMatchers(HttpMethod.PUT, "/locations/")
+                                        .requestMatchers(HttpMethod.PUT, "/locations")
+                                        .hasAnyAuthority("ADMIN")
+                                        .requestMatchers(HttpMethod.DELETE, "/locations")
                                         .hasAnyAuthority("ADMIN")
 
                                         .anyRequest().authenticated()

@@ -21,12 +21,12 @@ public class UserController {
 
     private static final Logger log = LoggerFactory.getLogger(UserController.class);
     private final UserService userService;
-    private final UserDtoMapping userDtoMapping;
+    private final UserDtoMapper userDtoMapper;
     private final AuthenticationUserService authenticationUserService;
 
-    public UserController(UserService userService, UserDtoMapping userDtoMapping, AuthenticationUserService authenticationUserService) {
+    public UserController(UserService userService, UserDtoMapper userDtoMapper, AuthenticationUserService authenticationUserService) {
         this.userService = userService;
-        this.userDtoMapping = userDtoMapping;
+        this.userDtoMapper = userDtoMapper;
         this.authenticationUserService = authenticationUserService;
     }
 
@@ -34,11 +34,11 @@ public class UserController {
     public ResponseEntity<UserDto> createUser(
             @RequestBody @Valid UserRegistration userRegistration
     ) {
-        log.info("Received request to create user: userRegistration={}", userRegistration);
+        log.info("Received request to create user: userRegistration.login={}", userRegistration.login());
         var createdUser = userService.registerUser(userRegistration);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(userDtoMapping.toDto(createdUser));
+                .body(userDtoMapper.toDto(createdUser));
     }
 
     @GetMapping
@@ -50,7 +50,7 @@ public class UserController {
         User foundUser = userService.getUserById(id);
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(userDtoMapping.toDto(foundUser));
+                .body(userDtoMapper.toDto(foundUser));
     }
 
     @GetMapping
@@ -58,7 +58,7 @@ public class UserController {
     public ResponseEntity<JwtTokenResponse> authenticateUser(
             @RequestBody @Valid SignInRequest signInRequest
     ) {
-        log.info("Received request to authenticate user: SignInRequest={}", signInRequest);
+        log.info("Received request to authenticate user: SignInRequest.login={}", signInRequest.login());
         String jwt = authenticationUserService.authenticate(signInRequest);
         return ResponseEntity
                 .status(HttpStatus.OK)

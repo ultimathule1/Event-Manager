@@ -11,14 +11,14 @@ import org.springframework.stereotype.Service;
 public class UserService {
 
     private final UserRepository userRepository;
-
     private final PasswordEncoder passwordEncoder;
+    private final UserEntityMapper userEntityMapper;
+    private static final String USER_NOT_FOUND = "User not found";
 
-    private final static String USER_NOT_FOUND = "User not found";
-
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, UserEntityMapper userEntityMapper) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.userEntityMapper = userEntityMapper;
     }
 
     public User registerUser(UserRegistration user) {
@@ -35,33 +35,24 @@ public class UserService {
                 getDefaultRole().name()
         ));
 
-        return toDomain(savedUserEntity);
+        return userEntityMapper.toDomain(savedUserEntity);
     }
 
     public User getUserById(Long id) {
         UserEntity user = userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
 
-        return toDomain(user);
+        return userEntityMapper.toDomain(user);
     }
 
     public User getUserByLogin(String login) {
         UserEntity user = userRepository.findByLogin(login)
                 .orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
 
-        return toDomain(user);
+        return userEntityMapper.toDomain(user);
     }
 
     private UserRole getDefaultRole() {
         return UserRole.USER;
-    }
-
-    private User toDomain(UserEntity userEntity) {
-        return new User(
-                userEntity.getId(),
-                userEntity.getLogin(),
-                userEntity.getAge(),
-                UserRole.valueOf(userEntity.getRole())
-        );
     }
 }

@@ -56,7 +56,6 @@ public class LocationController {
     }
 
     @DeleteMapping("/{locationId}")
-    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Void> deleteLocation(
             @PathVariable long locationId
     ) {
