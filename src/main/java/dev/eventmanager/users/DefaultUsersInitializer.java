@@ -1,8 +1,9 @@
 package dev.eventmanager.users;
 
+import dev.eventmanager.users.api.UserRegistration;
 import dev.eventmanager.users.db.UserEntity;
-import dev.eventmanager.users.db.UserRepository;
 import dev.eventmanager.users.domain.UserRole;
+import dev.eventmanager.users.domain.UserService;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -16,37 +17,41 @@ public class DefaultUsersInitializer {
     private static final String DEFAULT_ADMIN_LOGIN = "admin";
     private static final String DEFAULT_ADMIN_PASSWORD = "admin";
 
-    private final UserRepository userRepository;
+    private final UserService userService;
     private final PasswordEncoder passwordEncoder;
 
-    public DefaultUsersInitializer(UserRepository userRepository, PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
+    public DefaultUsersInitializer(UserService userService, PasswordEncoder passwordEncoder) {
+        this.userService = userService;
         this.passwordEncoder = passwordEncoder;
     }
 
     @EventListener(ContextRefreshedEvent.class)
-    public void onContextStarted(ContextRefreshedEvent event) {
+    public void onContextStartedCreateDefaultUsers(ContextRefreshedEvent event) {
         var userPassword = passwordEncoder.encode(DEFAULT_USER_PASSWORD);
         var adminPassword = passwordEncoder.encode(DEFAULT_ADMIN_PASSWORD);
 
-        if (!userRepository.existsByLogin(DEFAULT_USER_LOGIN)) {
-            userRepository.save(new UserEntity(
-                    null,
-                    DEFAULT_USER_LOGIN,
-                    20,
-                    userPassword,
-                    UserRole.USER.name()
-            ));
-        }
+        createUser(
+                DEFAULT_USER_LOGIN,
+                userPassword,
+                20,
+                UserRole.USER
+        );
 
-        if (!userRepository.existsByLogin(DEFAULT_ADMIN_LOGIN)) {
-            userRepository.save(new UserEntity(
-                    null,
-                    DEFAULT_ADMIN_LOGIN,
-                    20,
-                    adminPassword,
-                    UserRole.ADMIN.name()
-            ));
-        }
+        createUser(
+                DEFAULT_ADMIN_LOGIN,
+                adminPassword,
+                30,
+                UserRole.ADMIN
+        );
+    }
+
+    private void createUser(String login, String password, int age, UserRole role) {
+        UserRegistration userRegistration = new UserRegistration(
+                login,
+                password,
+                age
+        );
+
+        userService.registerUser(userRegistration, role);
     }
 }

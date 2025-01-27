@@ -22,20 +22,15 @@ public class UserService {
     }
 
     public User registerUser(UserRegistration user) {
-        if (userRepository.existsByLogin(user.login())) {
-            throw new IllegalArgumentException("Login already exists");
-        }
+        return createUser(user, getDefaultRole());
+    }
 
-        var userPassword = passwordEncoder.encode(user.password());
-        var savedUserEntity = userRepository.save(new UserEntity(
-                null,
-                user.login(),
-                user.age(),
-                userPassword,
-                getDefaultRole().name()
-        ));
+    public User registerUser(UserRegistration user, UserRole userRole) {
+        return createUser(user, userRole);
+    }
 
-        return userEntityMapper.toDomain(savedUserEntity);
+    public boolean existsByLogin(String login) {
+        return userRepository.existsByLogin(login);
     }
 
     public User getUserById(Long id) {
@@ -54,5 +49,22 @@ public class UserService {
 
     private UserRole getDefaultRole() {
         return UserRole.USER;
+    }
+
+    private User createUser(UserRegistration user, UserRole userRole) {
+        if (userRepository.existsByLogin(user.login())) {
+            throw new IllegalArgumentException("Login already exists");
+        }
+
+        var userPassword = passwordEncoder.encode(user.password());
+        var savedUserEntity = userRepository.save(new UserEntity(
+                null,
+                user.login(),
+                user.age(),
+                userPassword,
+                userRole.name()
+        ));
+
+        return userEntityMapper.toDomain(savedUserEntity);
     }
 }
