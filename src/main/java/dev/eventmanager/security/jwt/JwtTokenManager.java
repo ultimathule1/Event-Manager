@@ -1,7 +1,6 @@
 package dev.eventmanager.security.jwt;
 
 import dev.eventmanager.users.domain.UserRole;
-import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,14 +13,14 @@ import java.util.Date;
 public class JwtTokenManager {
 
     private final SecretKey key;
-    private final long EXPIRATION_TIME;
+    private final long expirationTime;
 
     public JwtTokenManager(
             @Value("${jwt.secret-key}") String key,
             @Value("${jwt.lifetime}") long expirationTime
     ) {
         this.key = Keys.hmacShaKeyFor(key.getBytes());
-        EXPIRATION_TIME = expirationTime;
+        this.expirationTime = expirationTime;
     }
 
     public boolean isTokenValid(String token) {
@@ -33,10 +32,7 @@ public class JwtTokenManager {
                     .getPayload()
                     .getExpiration();
 
-            if (dateExpiration == null || dateExpiration.before(new Date())) {
-                return false;
-            }
-            return true;
+            return dateExpiration != null && !dateExpiration.before(new Date());
         } catch (Exception e) {
             return false;
         }
@@ -48,7 +44,7 @@ public class JwtTokenManager {
                 .claim("role", role.name())
                 .signWith(key)
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                .expiration(new Date(System.currentTimeMillis() + expirationTime))
                 .compact();
     }
 
