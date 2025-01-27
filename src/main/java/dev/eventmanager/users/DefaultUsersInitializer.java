@@ -30,19 +30,23 @@ public class DefaultUsersInitializer {
         var userPassword = passwordEncoder.encode(DEFAULT_USER_PASSWORD);
         var adminPassword = passwordEncoder.encode(DEFAULT_ADMIN_PASSWORD);
 
-        createUser(
-                DEFAULT_USER_LOGIN,
-                userPassword,
-                20,
-                UserRole.USER
-        );
+        if (!userService.existsByLogin(DEFAULT_USER_LOGIN)) {
+            createUser(
+                    DEFAULT_USER_LOGIN,
+                    userPassword,
+                    20,
+                    UserRole.USER
+            );
+        }
 
-        createUser(
-                DEFAULT_ADMIN_LOGIN,
-                adminPassword,
-                30,
-                UserRole.ADMIN
-        );
+        if(!userService.existsByLogin(DEFAULT_ADMIN_LOGIN)) {
+            createUser(
+                    DEFAULT_ADMIN_LOGIN,
+                    adminPassword,
+                    30,
+                    UserRole.ADMIN
+            );
+        }
     }
 
     private void createUser(String login, String password, int age, UserRole role) {

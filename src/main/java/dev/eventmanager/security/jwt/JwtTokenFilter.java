@@ -52,6 +52,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         } catch (Exception e) {
             log.error("Error while reading jwt. Invalid JWT", e);
             filterChain.doFilter(request, response);
+            return;
         }
 
         var userForAuthentication = new UsernamePasswordAuthenticationToken(

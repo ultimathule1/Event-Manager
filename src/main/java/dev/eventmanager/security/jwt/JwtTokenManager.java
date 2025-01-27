@@ -59,7 +59,7 @@ public class JwtTokenManager {
     }
 
     public String getRoleByToken(String token) {
-        return(String) Jwts
+        return (String) Jwts
                 .parser()
                 .verifyWith(key)
                 .build()

@@ -12,6 +12,7 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -20,7 +21,6 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
 
 @Configuration
-@EnableMethodSecurity
 public class SecurityConfiguration {
 
     private final CustomUserDetails customUserDetails;
@@ -58,7 +58,7 @@ public class SecurityConfiguration {
                                         .hasAnyAuthority("ADMIN")
                                         .requestMatchers(HttpMethod.PUT, "/locations")
                                         .hasAnyAuthority("ADMIN")
-                                        .requestMatchers(HttpMethod.DELETE, "/locations")
+                                        .requestMatchers(HttpMethod.DELETE, "/locations/**")
                                         .hasAnyAuthority("ADMIN")
 
                                         .anyRequest().authenticated()
@@ -90,5 +90,26 @@ public class SecurityConfiguration {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return web -> web.debug(true).ignoring()
+                .requestMatchers("/css/**",
+                        "/js/**",
+                        "/img/**",
+                        "/lib/**",
+                        "/favicon.ico",
+                        "/swagger-ui/**",
+                        "/v2/api-docs",
+                        "/v3/api-docs",
+                        "/configuration/ui",
+                        "/swagger-resources/**",
+                        "/configuration/security",
+                        "/swagger-ui.html",
+                        "/webjars/**",
+                        "/v3/api-docs/swagger-config",
+                        "/openapi.yaml"
+                );
     }
 }

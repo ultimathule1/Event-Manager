@@ -134,7 +134,7 @@ public class LocationControllerTest extends RootTest {
     }
 
     @Test
-    @WithMockUser(username = "user", authorities = "USER")
+    @WithMockUser(username = "user_user", authorities = "USER")
     void shouldFailDeleteLocationByIdWithUserAuthority() throws Exception {
         LocationDto locationDtoToSave = createDummyLocationDto();
 
