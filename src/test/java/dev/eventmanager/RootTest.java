@@ -1,6 +1,8 @@
 package dev.eventmanager;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.eventmanager.users.domain.UserRole;
+import dev.eventmanager.users.UserTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -11,14 +13,20 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.containers.PostgreSQLContainer;
 
+import java.security.SecureRandom;
+
 @AutoConfigureMockMvc
 @SpringBootTest
-public class StarterTest {
+public class RootTest {
 
     @Autowired
     protected MockMvc mockMvc;
     @Autowired
     protected ObjectMapper objectMapper;
+    @Autowired
+    protected UserTestUtils userTestUtils;
+
+    protected final SecureRandom secureRandom = new SecureRandom();
 
     private static volatile boolean isSharedSetupDone = false;
 
@@ -40,10 +48,16 @@ public class StarterTest {
         registry.add("test.postgres.port", POSTGRES_CONTAINER::getFirstMappedPort);
     }
 
-    @EventListener
+    @EventListener(ContextStoppedEvent.class)
     public void stopContainer(ContextStoppedEvent event) {
         POSTGRES_CONTAINER.stop();
     }
 
+    public String getAuthorizationHeader(UserRole userRole) {
+        return "Bearer " + userTestUtils.getJwtToken(userRole);
+    }
 
+    public int getRandomInt() {
+        return secureRandom.nextInt();
+    }
 }
