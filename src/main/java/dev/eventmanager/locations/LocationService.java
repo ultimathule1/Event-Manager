@@ -30,12 +30,12 @@ public class LocationService {
     }
 
     public void deleteLocation(Long locationId) {
-        checkLocationExists(locationId);
+        checkLocationExistsById(locationId);
         locationRepository.deleteById(locationId);
     }
 
     public Location getLocationById(Long locationId) {
-        checkLocationExists(locationId);
+        checkLocationExistsById(locationId);
 
         return locationEntityMapper.toDomain(locationRepository.getLocationEntityById(locationId));
     }
@@ -57,7 +57,11 @@ public class LocationService {
         )));
     }
 
-    private void checkLocationExists(Long locationId) {
+    public boolean existsLocationById(Long locationId) {
+        return locationRepository.existsById(locationId);
+    }
+
+    private void checkLocationExistsById(Long locationId) {
         if (!locationRepository.existsById(locationId)) {
             throw new EntityNotFoundException("Location not found");
         }
