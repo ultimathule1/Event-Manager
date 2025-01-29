@@ -1,6 +1,7 @@
 package dev.eventmanager.events;
 
 import dev.eventmanager.config.MapperConfig;
+import dev.eventmanager.locations.LocationEntity;
 import dev.eventmanager.locations.LocationService;
 import dev.eventmanager.security.jwt.JwtTokenManager;
 import dev.eventmanager.users.db.UserEntity;
@@ -20,15 +21,12 @@ public class EventService {
     private final EventRepository eventRepository;
     private final LocationService locationService;
     private final UserService userService;
-    private final JwtTokenManager jwtTokenManager;
     private final MapperConfig mapperConfig;
-    private final Logger logger = LoggerFactory.getLogger(EventService.class);
 
-    public EventService(EventRepository eventRepository, LocationService locationService, UserService userService, JwtTokenManager jwtTokenManager, MapperConfig mapperConfig) {
+    public EventService(EventRepository eventRepository, LocationService locationService, UserService userService, MapperConfig mapperConfig) {
         this.eventRepository = eventRepository;
         this.locationService = locationService;
         this.userService = userService;
-        this.jwtTokenManager = jwtTokenManager;
         this.mapperConfig = mapperConfig;
     }
 
@@ -41,6 +39,13 @@ public class EventService {
                     .formatted(eventCreateRequestDto.locationId()));
         }
 
+        LocationEntity locationEntity = mapperConfig.getMapper().map(
+                locationService.getLocationById(eventCreateRequestDto.locationId()), LocationEntity.class
+        );
+        UserEntity userEntity = mapperConfig.getMapper().map(
+                userService.getUserById(user.id()), UserEntity.class
+        );
+
         EventEntity savedEventEntity = eventRepository.save(new EventEntity(
                 null,
                 eventCreateRequestDto.name(),
@@ -49,9 +54,9 @@ public class EventService {
                 eventCreateRequestDto.date(),
                 eventCreateRequestDto.cost(),
                 eventCreateRequestDto.duration(),
-                eventCreateRequestDto.locationId(),
+                locationEntity,
                 EventStatus.WAIT_START.name(),
-                user.id()
+                userEntity
         ));
 
         return mapperConfig.getMapper().map(savedEventEntity, Event.class);

@@ -14,9 +14,7 @@ public class MapperConfig {
     @Bean
     public ModelMapper getMapper() {
         ModelMapper mapper = new ModelMapper();
-        mapper.getConfiguration()
-                .setFieldAccessLevel(org.modelmapper.config.Configuration.AccessLevel.PRIVATE)
-                .setMatchingStrategy(MatchingStrategies.STRICT);
+        mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
 
         mapper.createTypeMap(EventEntity.class, Event.class)
                 .setConverter(ctx -> new Event(
@@ -26,8 +24,8 @@ public class MapperConfig {
                         ctx.getSource().getDate(),
                         ctx.getSource().getDuration(),
                         ctx.getSource().getCost(),
-                        ctx.getSource().getOwnerId(),
-                        ctx.getSource().getLocationId(),
+                        ctx.getSource().getOwner().getId(),
+                        ctx.getSource().getLocation().getId(),
                         ctx.getSource().getStatus(),
                         ctx.getSource().getMaxPlaces()
                         ));
