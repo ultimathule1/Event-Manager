@@ -32,13 +32,15 @@ public class EventEntity {
     @Column(name = "occupiedPlaces")
     private int occupiedPlaces;
     @Column(name = "date")
-    private LocalDateTime startDate;
+    private LocalDateTime date;
     @Column(name = "cost")
     private BigDecimal cost;
     @Column(name = "duration")
     private int duration;
-    @Column(name = "locationId")
+    @Column(name = "location_id")
     private Long locationId;
     @Column(name = "status")
     private String status;
+    @Column(name = "owner_id")
+    private Long ownerId;
 }

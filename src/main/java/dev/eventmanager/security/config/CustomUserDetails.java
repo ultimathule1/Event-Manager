@@ -1,4 +1,4 @@
-package dev.eventmanager.security;
+package dev.eventmanager.security.config;
 
 import dev.eventmanager.users.db.UserEntity;
 import dev.eventmanager.users.db.UserRepository;

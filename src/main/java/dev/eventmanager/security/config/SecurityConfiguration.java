@@ -1,4 +1,4 @@
-package dev.eventmanager.security;
+package dev.eventmanager.security.config;
 
 import dev.eventmanager.security.exceptions.handlers.CustomAccessDeniedHandler;
 import dev.eventmanager.security.exceptions.handlers.CustomAuthenticationEntryPoint;
@@ -10,7 +10,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -60,6 +59,9 @@ public class SecurityConfiguration {
                                         .hasAnyAuthority("ADMIN")
                                         .requestMatchers(HttpMethod.DELETE, "/locations/**")
                                         .hasAnyAuthority("ADMIN")
+
+                                        .requestMatchers(HttpMethod.POST, "/events")
+                                        .hasAnyAuthority("USER")
 
                                         .anyRequest().authenticated()
                 )

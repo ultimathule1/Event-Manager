@@ -23,6 +23,9 @@ public record EventDto(
         Integer duration,
         @NotNull
         Long locationId,
-        Long ownerId
+        @NotNull
+        Long ownerId,
+        @NotNull
+        String status
 ) {
 }

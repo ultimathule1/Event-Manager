@@ -1,8 +1,10 @@
 package dev.eventmanager.events;
 
+import dev.eventmanager.config.MapperConfig;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -15,9 +17,11 @@ public class EventController {
 
     private static final Logger log = LoggerFactory.getLogger(EventController.class);
     private final EventService eventService;
+    private final MapperConfig mapperConfig;
 
-    public EventController(EventService eventService) {
+    public EventController(EventService eventService, MapperConfig mapperConfig) {
         this.eventService = eventService;
+        this.mapperConfig = mapperConfig;
     }
 
     @PostMapping
@@ -25,8 +29,10 @@ public class EventController {
             @RequestBody @Valid EventCreateRequestDto eventCreateRequestDto
     ) {
         log.info("Request to create event: eventCreateRequestDto={}", eventCreateRequestDto);
-        eventService.createEvent(eventCreateRequestDto);
+        Event event = eventService.createEvent(eventCreateRequestDto);
 
-        return null;
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(mapperConfig.getMapper().map(event, EventDto.class));
     }
 }
