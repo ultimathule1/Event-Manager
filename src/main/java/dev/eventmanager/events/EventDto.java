@@ -18,6 +18,7 @@ public record EventDto(
         @Min(0)
         @NotNull
         BigDecimal cost,
+        @NotNull
         int occupiedPlaces,
         @Min(30)
         @NotNull

@@ -39,7 +39,7 @@ public class EventEntity {
     private int occupiedPlaces;
     @Column(name = "date")
     private OffsetDateTime startDate;
-    @Column(name = "cost")
+    @Column(name = "cost", scale = 2)
     private BigDecimal cost;
     @Column(name = "duration")
     private int duration;

@@ -1,6 +1,7 @@
 package dev.eventmanager;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.eventmanager.config.MapperConfig;
 import dev.eventmanager.users.domain.UserRole;
 import dev.eventmanager.users.UserTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,8 @@ public class RootTest {
     protected ObjectMapper objectMapper;
     @Autowired
     protected UserTestUtils userTestUtils;
+    @Autowired
+    protected MapperConfig mapperConfig;
 
     protected final SecureRandom secureRandom = new SecureRandom();
 
