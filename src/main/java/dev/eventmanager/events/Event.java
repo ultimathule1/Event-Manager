@@ -3,7 +3,7 @@ package dev.eventmanager.events;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-public record Event (
+public record Event(
         Long id,
         String name,
         int occupiedPlaces,
@@ -14,5 +14,5 @@ public record Event (
         Long locationId,
         String status,
         int maxPlaces
-){
+) {
 }

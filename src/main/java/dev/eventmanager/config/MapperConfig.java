@@ -21,7 +21,7 @@ public class MapperConfig {
                         ctx.getSource().getId(),
                         ctx.getSource().getName(),
                         ctx.getSource().getOccupiedPlaces(),
-                        ctx.getSource().getDate(),
+                        ctx.getSource().getStartDate(),
                         ctx.getSource().getDuration(),
                         ctx.getSource().getCost(),
                         ctx.getSource().getOwnerId(),

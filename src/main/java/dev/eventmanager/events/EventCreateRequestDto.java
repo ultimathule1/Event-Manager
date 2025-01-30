@@ -1,7 +1,6 @@
 package dev.eventmanager.events;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
@@ -12,7 +11,7 @@ import jakarta.validation.constraints.PositiveOrZero;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-public record EventCreateRequestDto (
+public record EventCreateRequestDto(
         @NotEmpty
         String name,
         @NotNull
@@ -30,5 +29,5 @@ public record EventCreateRequestDto (
         int duration,
         @NotNull
         Long locationId
-){
+) {
 }

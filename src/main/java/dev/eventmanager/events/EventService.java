@@ -2,12 +2,9 @@ package dev.eventmanager.events;
 
 import dev.eventmanager.config.MapperConfig;
 import dev.eventmanager.locations.LocationService;
-import dev.eventmanager.security.jwt.JwtTokenManager;
 import dev.eventmanager.users.domain.User;
 import dev.eventmanager.users.domain.UserService;
 import jakarta.persistence.EntityNotFoundException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -18,15 +15,17 @@ public class EventService {
     private final EventRepository eventRepository;
     private final LocationService locationService;
     private final UserService userService;
-    private final JwtTokenManager jwtTokenManager;
     private final MapperConfig mapperConfig;
-    private final Logger logger = LoggerFactory.getLogger(EventService.class);
 
-    public EventService(EventRepository eventRepository, LocationService locationService, UserService userService, JwtTokenManager jwtTokenManager, MapperConfig mapperConfig) {
+    public EventService(
+            EventRepository eventRepository,
+            LocationService locationService,
+            UserService userService,
+            MapperConfig mapperConfig) {
+
         this.eventRepository = eventRepository;
         this.locationService = locationService;
         this.userService = userService;
-        this.jwtTokenManager = jwtTokenManager;
         this.mapperConfig = mapperConfig;
     }
 
@@ -52,5 +51,14 @@ public class EventService {
         ));
 
         return mapperConfig.getMapper().map(savedEventEntity, Event.class);
+    }
+
+    public Event getEventById(Long id) {
+        EventEntity event = eventRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Event with id=%s not found"));
+
+        return mapperConfig
+                .getMapper()
+                .map(event, Event.class);
     }
 }
