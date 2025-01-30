@@ -20,19 +20,19 @@ public class EventController {
     private final MapperConfig mapperConfig;
 
     public EventController(EventService eventService, MapperConfig mapperConfig) {
-        this.eventService = eventService;
-        this.mapperConfig = mapperConfig;
-    }
+            this.eventService = eventService;
+            this.mapperConfig = mapperConfig;
+        }
 
-    @PostMapping
-    public ResponseEntity<EventDto> createEvent(
-            @RequestBody @Valid EventCreateRequestDto eventCreateRequestDto
+        @PostMapping
+        public ResponseEntity<EventDto> createEvent(
+                @RequestBody @Valid EventCreateRequestDto eventCreateRequestDto
     ) {
-        log.info("Request to create event: eventCreateRequestDto={}", eventCreateRequestDto);
-        Event event = eventService.createEvent(eventCreateRequestDto);
+            log.info("Request to create event: eventCreateRequestDto={}", eventCreateRequestDto);
+            Event event = eventService.createEvent(eventCreateRequestDto);
 
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(mapperConfig.getMapper().map(event, EventDto.class));
+            return ResponseEntity
+                    .status(HttpStatus.CREATED)
+                    .body(mapperConfig.getMapper().map(event, EventDto.class));
+        }
     }
-}

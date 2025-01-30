@@ -4,7 +4,6 @@ import dev.eventmanager.security.jwt.JwtTokenManager;
 import dev.eventmanager.users.api.SignInRequest;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -32,8 +31,4 @@ public class AuthenticationUserService {
 
         return jwtTokenManager.generateToken(signInRequest.login(), findUser.role());
     }
-
-//    public boolean isAuthenticated() {
-//        var authenticatedUser = SecurityContextHolder.getContext().getAuthentication();
-//    }
 }

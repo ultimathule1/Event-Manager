@@ -24,18 +24,18 @@ public class MapperConfig {
                         ctx.getSource().getDate(),
                         ctx.getSource().getDuration(),
                         ctx.getSource().getCost(),
-                        ctx.getSource().getOwner().getId(),
-                        ctx.getSource().getLocation().getId(),
+                        ctx.getSource().getOwnerId(),
+                        ctx.getSource().getLocationId(),
                         ctx.getSource().getStatus(),
                         ctx.getSource().getMaxPlaces()
-                        ));
+                ));
 
         mapper.createTypeMap(Event.class, EventDto.class)
                 .setConverter(ctx -> new EventDto(
                         ctx.getSource().id(),
                         ctx.getSource().name(),
                         ctx.getSource().maxPlaces(),
-                        ctx.getSource().date(),
+                        ctx.getSource().startDate(),
                         ctx.getSource().cost(),
                         ctx.getSource().occupiedPlaces(),
                         ctx.getSource().duration(),
@@ -43,7 +43,6 @@ public class MapperConfig {
                         ctx.getSource().ownerId(),
                         ctx.getSource().status()
                 ));
-
         return mapper;
     }
 }

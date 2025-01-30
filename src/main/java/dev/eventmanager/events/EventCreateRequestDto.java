@@ -26,7 +26,7 @@ public record EventCreateRequestDto (
         @PositiveOrZero
         BigDecimal cost,
         @NotNull
-        @Min(value = 30, message = "duration must be at least 30")
+        @Min(30)
         int duration,
         @NotNull
         Long locationId

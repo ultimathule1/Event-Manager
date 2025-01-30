@@ -37,17 +37,15 @@ public class EventEntity {
     @Column(name = "occupiedPlaces")
     private int occupiedPlaces;
     @Column(name = "date")
-    private LocalDateTime date;
+    private LocalDateTime startDate;
     @Column(name = "cost")
     private BigDecimal cost;
     @Column(name = "duration")
     private int duration;
-    @ManyToOne
-    @JoinColumn(name = "location_id", referencedColumnName = "id")
-    private LocationEntity location;
+    @Column(name = "location_id")
+    private Long locationId;
     @Column(name = "status")
     private String status;
-    @ManyToOne
-    @JoinColumn(name = "owner_id", referencedColumnName = "id")
-    private UserEntity owner;
+    @Column(name = "owner_id")
+    private Long ownerId;
 }

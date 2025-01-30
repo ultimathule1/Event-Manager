@@ -7,7 +7,7 @@ public record Event (
         Long id,
         String name,
         int occupiedPlaces,
-        LocalDateTime date,
+        LocalDateTime startDate,
         int duration,
         BigDecimal cost,
         Long ownerId,
