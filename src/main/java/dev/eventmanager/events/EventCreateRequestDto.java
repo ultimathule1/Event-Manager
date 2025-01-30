@@ -10,6 +10,7 @@ import jakarta.validation.constraints.PositiveOrZero;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 public record EventCreateRequestDto(
         @NotEmpty
@@ -20,7 +21,7 @@ public record EventCreateRequestDto(
         @NotNull
         @Future
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
-        LocalDateTime date,
+        OffsetDateTime date,
         @NotNull
         @PositiveOrZero
         BigDecimal cost,

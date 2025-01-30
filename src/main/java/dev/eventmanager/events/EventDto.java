@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 public record EventDto(
         Long id,
@@ -13,7 +14,7 @@ public record EventDto(
         @NotNull
         Integer maxPlaces,
         @NotNull
-        LocalDateTime date,
+        OffsetDateTime date,
         @Min(0)
         @NotNull
         BigDecimal cost,

@@ -13,6 +13,8 @@ import org.springframework.security.test.context.support.WithMockUser;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -40,7 +42,11 @@ public class EventControllerTest extends RootTest {
         var eventCreateRequestDto = new EventCreateRequestDto(
                 "Joker <?> Java Problem conference",
                 500,
-                LocalDateTime.now().plusMonths(9).minusDays(10),
+                OffsetDateTime
+                        .now(ZoneOffset.UTC)
+                        .plusMonths(9)
+                        .minusDays(10)
+                        .withNano(0),
                 new BigDecimal(String.valueOf(1000)),
                 60,
                 location.id()
@@ -58,8 +64,16 @@ public class EventControllerTest extends RootTest {
         EventDto eventDto = objectMapper.readValue(createdEventJsonResp, EventDto.class);
 
         Assertions.assertEquals(eventDto.status(), EventStatus.WAIT_START.name());
+        Assertions.assertEquals(location.id(), eventDto.locationId());
         org.assertj.core.api.Assertions.assertThat(eventDto)
                 .usingRecursiveComparison()
+                .ignoringFields("id", "occupiedPlaces", "ownerId", "status")
                 .isEqualTo(eventCreateRequestDto);
+    }
+
+    @Test
+    @WithMockUser(username = "admin", authorities = "ADMIN")
+    void shouldFailCreateEvent() throws Exception {
+        
     }
 }

@@ -18,6 +18,7 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "events")
@@ -37,7 +38,7 @@ public class EventEntity {
     @Column(name = "occupiedPlaces")
     private int occupiedPlaces;
     @Column(name = "date")
-    private LocalDateTime startDate;
+    private OffsetDateTime startDate;
     @Column(name = "cost")
     private BigDecimal cost;
     @Column(name = "duration")
