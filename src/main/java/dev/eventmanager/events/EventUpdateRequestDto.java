@@ -1,21 +1,26 @@
 package dev.eventmanager.events;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.PositiveOrZero;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
 public record EventUpdateRequestDto(
         String eventName,
+        @PositiveOrZero
         Long maxPlaces,
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
+        @Future
         OffsetDateTime startDate,
         @PositiveOrZero
         BigDecimal cost,
         @Min(30)
-        Long duration,
+        int duration,
+        @PositiveOrZero
         Long locationId
 ) {
 }

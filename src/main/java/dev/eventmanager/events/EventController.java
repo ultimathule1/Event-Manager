@@ -66,10 +66,17 @@ public class EventController {
 
     @PutMapping("/{id}")
     public ResponseEntity<EventDto> updateEvent(
-            @PathVariable("/id") Long id,
+            @PathVariable("id") Long id,
             @RequestBody @Valid EventUpdateRequestDto eventUpdateRequestDto
     ) {
         log.info("Request to update event by id: id={}, eventUpdateRequestDto={}", id, eventUpdateRequestDto);
-        eventService.updateEvent(id, eventUpdateRequestDto);
+        EventDto updatedEventDto = mapperConfig.getMapper().map(
+                eventService.updateEvent(id, eventUpdateRequestDto),
+                EventDto.class
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(updatedEventDto);
     }
 }

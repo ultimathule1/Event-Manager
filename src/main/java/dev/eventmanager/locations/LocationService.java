@@ -63,7 +63,7 @@ public class LocationService {
 
     private void checkLocationExistsById(Long locationId) {
         if (!locationRepository.existsById(locationId)) {
-            throw new EntityNotFoundException("Location not found");
+            throw new EntityNotFoundException("Location with id=%s not found".formatted(locationId));
         }
     }
 
