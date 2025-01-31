@@ -52,7 +52,7 @@ public class EventController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteEvent(
+    public ResponseEntity<Void> cancelEvent(
             @PathVariable("id") Long eventId
     ) {
         log.info("Request to delete event by id: eventId={}", eventId);

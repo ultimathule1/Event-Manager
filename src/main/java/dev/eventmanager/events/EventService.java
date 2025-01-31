@@ -66,6 +66,8 @@ public class EventService {
     /**
      * There is a soft removal of the event.
      * The event is not deleted from the database, but goes only into the mode of canceled
+     * Can be deleted either an admin or the creator of the event.
+     *
      * @param eventId
      */
     public void deleteEvent(Long eventId) {
@@ -73,35 +75,20 @@ public class EventService {
 
         EventEntity foundEventEntity = eventRepository.findById(eventId)
                 .orElseThrow(() -> new EntityNotFoundException("Event with id=%s not found"));
-        Event foundEvent = mapperConfig.getMapper().map(foundEventEntity, Event.class);
-        //Здесь ошибка
-        if (!(currentUser.role() == UserRole.ADMIN) || !(foundEvent.ownerId().equals(currentUser.id()))) {
+
+        if (!(currentUser.role() == UserRole.ADMIN) && !(foundEventEntity.getOwnerId().equals(currentUser.id()))) {
             throw new AuthorizationDeniedException("You do not have permission to delete this event");
         }
 
-        if (foundEvent.status().equals(EventStatus.CANCELLED.name())) {
+        if (foundEventEntity.getStatus().equals(EventStatus.CANCELLED.name())) {
             throw new IllegalArgumentException("Event with id=%s is already cancelled");
         }
-        if (!foundEvent.status().equals(EventStatus.WAIT_START.name())) {
+        if (!foundEventEntity.getStatus().equals(EventStatus.WAIT_START.name())) {
             throw new IllegalArgumentException("Event with id=%s already cannot be cancelled");
         }
-        //-----------------------------------
-        // Возможно сделать через Builder
-        //-----------------------------------
-        Event updatedEvent = new Event(
-                foundEvent.id(),
-                foundEvent.name(),
-                foundEvent.occupiedPlaces(),
-                foundEvent.startDate(),
-                foundEvent.duration(),
-                foundEvent.cost(),
-                foundEvent.ownerId(),
-                foundEvent.locationId(),
-                EventStatus.CANCELLED.name(),
-                foundEvent.maxPlaces()
-        );
 
-        eventRepository.save(mapperConfig.getMapper().map(updatedEvent, EventEntity.class));
+        foundEventEntity.setStatus(EventStatus.CANCELLED.name());
+        eventRepository.save(foundEventEntity);
     }
 
     private User getAuthenticatedUser() {

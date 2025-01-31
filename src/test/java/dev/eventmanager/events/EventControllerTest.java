@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -144,13 +145,44 @@ public class EventControllerTest extends RootTest {
     }
 
     @Test
-    @WithMockUser(username = "user", authorities = "ADMIN")
+    @WithMockUser(username = "admin", authorities = "ADMIN")
     void shouldFailToGetEventById() throws Exception {
         Location savedLocation = locationService.createLocation(createDummyLocation());
         var eventCreateRequestDto = createDummyEventCreateRequestDto(savedLocation.id());
         Event savedEvent = eventService.createEvent(eventCreateRequestDto);
 
         mockMvc.perform(get("/events/%s".formatted(savedEvent.id() + 1)))
+                .andExpect(status().is(HttpStatus.NOT_FOUND.value()));
+    }
+
+    @Test
+    @WithMockUser(username = "user", authorities = "USER")
+    void shouldSuccessCancelEventById() throws Exception {
+        Location savedLocation = locationService.createLocation(createDummyLocation());
+        var eventCreateRequestDto = createDummyEventCreateRequestDto(savedLocation.id());
+        Event savedEvent = eventService.createEvent(eventCreateRequestDto);
+
+        mockMvc.perform(delete("/events/%s".formatted(savedEvent.id())))
+                .andExpect(status().is(HttpStatus.NO_CONTENT.value()));
+
+        var cancelledEvent = eventService.getEventById(savedEvent.id());
+
+        org.assertj.core.api.Assertions.assertThat(cancelledEvent)
+                .usingRecursiveComparison()
+                .ignoringFields("status")
+                .isEqualTo(savedEvent);
+        Assertions.assertNotEquals(savedEvent.status(), cancelledEvent.status());
+        Assertions.assertEquals(cancelledEvent.status(), EventStatus.CANCELLED.name());
+    }
+
+    @Test
+    @WithMockUser(username = "admin", authorities = "ADMIN")
+    void shouldFailToCancelEventById() throws Exception {
+        Location savedLocation = locationService.createLocation(createDummyLocation());
+        var eventCreateRequestDto = createDummyEventCreateRequestDto(savedLocation.id());
+        Event savedEvent = eventService.createEvent(eventCreateRequestDto);
+
+        mockMvc.perform(delete("/events/%s".formatted(savedEvent.id() + 1)))
                 .andExpect(status().is(HttpStatus.NOT_FOUND.value()));
     }
 
