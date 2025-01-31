@@ -6,6 +6,7 @@ import dev.eventmanager.users.domain.User;
 import dev.eventmanager.users.domain.UserRole;
 import dev.eventmanager.users.domain.UserService;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -97,5 +98,17 @@ public class EventService {
             throw new SecurityException("You are not logged in");
         }
         return userService.getUserByLogin(auth.getName());
+    }
+
+    public void updateEvent(
+            Long id,
+            EventUpdateRequestDto eventUpdateRequestDto
+    ) {
+        EventEntity event = eventRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Event with id=%s not found"));
+        EventUpdateBuilder eventUpdateBuilder = EventUpdateBuilder.builder(
+                mapperConfig.getMapper().map(event, Event.class)
+        );
+
     }
 }
