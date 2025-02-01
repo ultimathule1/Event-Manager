@@ -20,6 +20,7 @@ import java.time.ZoneOffset;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 public class EventControllerTest extends RootTest {
@@ -186,6 +187,102 @@ public class EventControllerTest extends RootTest {
                 .andExpect(status().is(HttpStatus.NOT_FOUND.value()));
     }
 
+    @Test
+    @WithMockUser(username = "user", authorities = "USER")
+    void shouldSuccessUpdateEvent() throws Exception {
+        Location savedLocation = locationService.createLocation(createDummyLocation());
+        var eventCreateRequestDto = createDummyEventCreateRequestDto(savedLocation.id());
+        Event savedEvent = eventService.createEvent(eventCreateRequestDto);
+
+        var eventUpdateRequestDto = new EventUpdateRequestDto(
+                "new Event",
+                400,
+                OffsetDateTime
+                        .now(ZoneOffset.UTC)
+                        .plusMonths(8)
+                        .plusDays(14)
+                        .withNano(0),
+                BigDecimal.valueOf(1000).setScale(2, RoundingMode.HALF_UP),
+                70,
+                savedLocation.id()
+        );
+
+        String updatedEventJson = mockMvc.perform(put("/events/%s".formatted(savedEvent.id()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(eventUpdateRequestDto))
+        )
+                .andExpect(status().is(HttpStatus.OK.value()))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        EventDto updatedEvent = objectMapper.readValue(updatedEventJson, EventDto.class);
+
+        Assertions.assertEquals(savedEvent.status(), updatedEvent.status());
+        Assertions.assertEquals(savedEvent.ownerId(), updatedEvent.ownerId());
+        Assertions.assertEquals(savedEvent.id(), updatedEvent.id());
+        Assertions.assertEquals(savedEvent.occupiedPlaces(), updatedEvent.occupiedPlaces());
+
+        Assertions.assertEquals(eventUpdateRequestDto.eventName(), updatedEvent.name());
+        Assertions.assertEquals(eventUpdateRequestDto.maxPlaces(), updatedEvent.maxPlaces());
+        Assertions.assertEquals(eventUpdateRequestDto.cost(), updatedEvent.cost());
+        Assertions.assertEquals(eventUpdateRequestDto.locationId(), updatedEvent.locationId());
+        Assertions.assertEquals(eventUpdateRequestDto.duration(), updatedEvent.duration());
+        Assertions.assertEquals(eventUpdateRequestDto.startDate(), updatedEvent.date());
+    }
+
+    @Test
+    @WithMockUser(username = "user", authorities = "USER")
+    void shouldFailUpdateEventBecauseInvalidMaxPlacesInRequest() throws Exception {
+        Location savedLocation = locationService.createLocation(createDummyLocation());
+        var eventCreateRequestDto = createDummyEventCreateRequestDto(savedLocation.id());
+        Event savedEvent = eventService.createEvent(eventCreateRequestDto);
+
+        var eventUpdateRequestDto = new EventUpdateRequestDto(
+                "new Event",
+                299,
+                OffsetDateTime
+                        .now(ZoneOffset.UTC)
+                        .plusMonths(8)
+                        .plusDays(14)
+                        .withNano(0),
+                BigDecimal.valueOf(1000).setScale(2, RoundingMode.HALF_UP),
+                70,
+                savedLocation.id()
+        );
+
+        mockMvc.perform(put("/events/%s".formatted(savedEvent.id()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(eventUpdateRequestDto)))
+                .andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
+    }
+    @Test
+    @WithMockUser(username = "user", authorities = "USER")
+    void shouldFailUpdateEventBecauseInvalidLocationIdInRequest() throws Exception {
+        Location savedLocation = locationService.createLocation(createDummyLocation());
+        var eventCreateRequestDto = createDummyEventCreateRequestDto(savedLocation.id());
+        Event savedEvent = eventService.createEvent(eventCreateRequestDto);
+
+        var eventUpdateRequestDto = new EventUpdateRequestDto(
+                "new Event",
+                299,
+                OffsetDateTime
+                        .now(ZoneOffset.UTC)
+                        .plusMonths(8)
+                        .plusDays(14)
+                        .withNano(0),
+                BigDecimal.valueOf(1000).setScale(2, RoundingMode.HALF_UP),
+                70,
+                savedLocation.id() + 1
+        );
+
+        mockMvc.perform(put("/events/%s".formatted(savedEvent.id()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(eventUpdateRequestDto)))
+                .andExpect(status().is(HttpStatus.NOT_FOUND.value()));
+    }
+
+
     private Location createDummyLocation() {
         return new Location(
                 null,
@@ -199,7 +296,7 @@ public class EventControllerTest extends RootTest {
     private EventCreateRequestDto createDummyEventCreateRequestDto(Long locationId) {
         return new EventCreateRequestDto(
                 "Joker <?> Java Problem conference",
-                500,
+                300,
                 OffsetDateTime
                         .now(ZoneOffset.UTC)
                         .plusMonths(9)

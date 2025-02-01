@@ -1,6 +1,7 @@
 package dev.eventmanager.events;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -10,16 +11,18 @@ import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
 public record EventUpdateRequestDto(
+        @JsonProperty("name")
         String eventName,
         @PositiveOrZero
-        Long maxPlaces,
+        Integer maxPlaces,
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
         @Future
+        @JsonProperty("date")
         OffsetDateTime startDate,
         @PositiveOrZero
         BigDecimal cost,
         @Min(30)
-        int duration,
+        Integer duration,
         @PositiveOrZero
         Long locationId
 ) {

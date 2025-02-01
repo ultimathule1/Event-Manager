@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/events")
 public class EventController {
@@ -78,5 +80,11 @@ public class EventController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(updatedEventDto);
+    }
+
+    @GetMapping("/my")
+    public ResponseEntity<List<EventDto>> getEventsCreatedByCurrentUser() {
+        log.info("Request to get current user events");
+        eventService.getEventsCreatedByCurrentUser();
     }
 }

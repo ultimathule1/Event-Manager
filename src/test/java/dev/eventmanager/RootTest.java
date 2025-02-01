@@ -28,7 +28,6 @@ public class RootTest {
     protected UserTestUtils userTestUtils;
     @Autowired
     protected MapperConfig mapperConfig;
-
     protected final SecureRandom secureRandom = new SecureRandom();
 
     private static volatile boolean isSharedSetupDone = false;
