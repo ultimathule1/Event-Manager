@@ -69,11 +69,11 @@ public class EventController {
     @PutMapping("/{id}")
     public ResponseEntity<EventDto> updateEvent(
             @PathVariable("id") Long id,
-            @RequestBody @Valid EventUpdateRequestDto eventUpdateRequestDto
+            @RequestBody @Valid EventUpdateRequest eventUpdateRequest
     ) {
-        log.info("Request to update event by id: id={}, eventUpdateRequestDto={}", id, eventUpdateRequestDto);
+        log.info("Request to update event by id: id={}, eventUpdateRequest={}", id, eventUpdateRequest);
         EventDto updatedEventDto = mapperConfig.getMapper().map(
-                eventService.updateEvent(id, eventUpdateRequestDto),
+                eventService.updateEvent(id, eventUpdateRequest),
                 EventDto.class
         );
 
@@ -84,7 +84,14 @@ public class EventController {
 
     @GetMapping("/my")
     public ResponseEntity<List<EventDto>> getEventsCreatedByCurrentUser() {
-        log.info("Request to get current user events");
-        eventService.getEventsCreatedByCurrentUser();
+        log.info("Request to get events created by current user");
+        List<EventDto> events = eventService.getEventsCreatedByCurrentUser()
+                .stream()
+                .map(e -> mapperConfig.getMapper().map(e, EventDto.class))
+                .toList();
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(events);
     }
 }

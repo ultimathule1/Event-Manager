@@ -1,8 +1,8 @@
 package dev.eventmanager.events;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import dev.eventmanager.RootTest;
 import dev.eventmanager.locations.Location;
-import dev.eventmanager.locations.LocationEntity;
 import dev.eventmanager.locations.LocationService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -13,9 +13,9 @@ import org.springframework.security.test.context.support.WithMockUser;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.List;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -194,7 +194,7 @@ public class EventControllerTest extends RootTest {
         var eventCreateRequestDto = createDummyEventCreateRequestDto(savedLocation.id());
         Event savedEvent = eventService.createEvent(eventCreateRequestDto);
 
-        var eventUpdateRequestDto = new EventUpdateRequestDto(
+        var eventUpdateRequestDto = new EventUpdateRequest(
                 "new Event",
                 400,
                 OffsetDateTime
@@ -208,9 +208,9 @@ public class EventControllerTest extends RootTest {
         );
 
         String updatedEventJson = mockMvc.perform(put("/events/%s".formatted(savedEvent.id()))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(eventUpdateRequestDto))
-        )
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(eventUpdateRequestDto))
+                )
                 .andExpect(status().is(HttpStatus.OK.value()))
                 .andReturn()
                 .getResponse()
@@ -233,12 +233,46 @@ public class EventControllerTest extends RootTest {
 
     @Test
     @WithMockUser(username = "user", authorities = "USER")
+    void shouldSuccessUpdateEventOnlyName() throws Exception {
+        Location savedLocation = locationService.createLocation(createDummyLocation());
+        var eventCreateRequestDto = createDummyEventCreateRequestDto(savedLocation.id());
+        Event savedEvent = eventService.createEvent(eventCreateRequestDto);
+
+        var eventUpdateRequestDto = new EventUpdateRequest(
+                "About New Something",
+                null,
+                null,
+                null,
+                null,
+                null
+        );
+
+        String updatedEventDtoRespJson =
+                mockMvc.perform(put("/events/%s".formatted(savedEvent.id()))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(eventUpdateRequestDto)))
+                        .andExpect(status().is(HttpStatus.OK.value()))
+                        .andReturn()
+                        .getResponse()
+                        .getContentAsString();
+
+        EventDto updatedEventDtoResp = objectMapper.readValue(updatedEventDtoRespJson, EventDto.class);
+
+        Assertions.assertEquals(updatedEventDtoResp.name(), eventUpdateRequestDto.eventName());
+        org.assertj.core.api.Assertions.assertThat(eventService.getEventById(savedEvent.id()))
+                .usingRecursiveComparison()
+                .ignoringFields("name")
+                .isEqualTo(eventService.getEventById(updatedEventDtoResp.id()));
+    }
+
+    @Test
+    @WithMockUser(username = "user", authorities = "USER")
     void shouldFailUpdateEventBecauseInvalidMaxPlacesInRequest() throws Exception {
         Location savedLocation = locationService.createLocation(createDummyLocation());
         var eventCreateRequestDto = createDummyEventCreateRequestDto(savedLocation.id());
         Event savedEvent = eventService.createEvent(eventCreateRequestDto);
 
-        var eventUpdateRequestDto = new EventUpdateRequestDto(
+        var eventUpdateRequestDto = new EventUpdateRequest(
                 "new Event",
                 299,
                 OffsetDateTime
@@ -256,6 +290,7 @@ public class EventControllerTest extends RootTest {
                         .content(objectMapper.writeValueAsString(eventUpdateRequestDto)))
                 .andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
     }
+
     @Test
     @WithMockUser(username = "user", authorities = "USER")
     void shouldFailUpdateEventBecauseInvalidLocationIdInRequest() throws Exception {
@@ -263,7 +298,7 @@ public class EventControllerTest extends RootTest {
         var eventCreateRequestDto = createDummyEventCreateRequestDto(savedLocation.id());
         Event savedEvent = eventService.createEvent(eventCreateRequestDto);
 
-        var eventUpdateRequestDto = new EventUpdateRequestDto(
+        var eventUpdateRequestDto = new EventUpdateRequest(
                 "new Event",
                 299,
                 OffsetDateTime
@@ -279,9 +314,55 @@ public class EventControllerTest extends RootTest {
         mockMvc.perform(put("/events/%s".formatted(savedEvent.id()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(eventUpdateRequestDto)))
-                .andExpect(status().is(HttpStatus.NOT_FOUND.value()));
+                .andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
     }
 
+    @Test
+    @WithMockUser(username = "user", authorities = "USER")
+    void shouldGetCreatedEventsByCurrentUser() throws Exception {
+        Location savedLocation = locationService.createLocation(createDummyLocation());
+        var eventCreateRequestDto = createDummyEventCreateRequestDto(savedLocation.id());
+        Event savedEvent = eventService.createEvent(eventCreateRequestDto);
+        Event savedEvent2 = eventService.createEvent(eventCreateRequestDto);
+
+        String eventsDtoRespJson = mockMvc.perform(get("/events/my"))
+                .andExpect(status().is(HttpStatus.OK.value()))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        List<EventDto> eventDtos = objectMapper.readValue(
+                eventsDtoRespJson,
+                new TypeReference<List<EventDto>>() {
+                }
+        );
+
+        org.assertj.core.api.Assertions.assertThat(eventDtos).hasSize(2);
+        org.assertj.core.api.Assertions.assertThat(mapperConfig.getMapper().map(savedEvent, EventDto.class))
+                .usingRecursiveComparison()
+                .isEqualTo(eventDtos.getFirst());
+        org.assertj.core.api.Assertions.assertThat(mapperConfig.getMapper().map(savedEvent2, EventDto.class))
+                .usingRecursiveComparison()
+                .isEqualTo(eventDtos.getLast());
+    }
+
+    @Test
+    @WithMockUser(username = "user", authorities = "USER")
+    void shouldGetEmptyArrayForCurrentUser() throws Exception {
+        String eventsDtoRespJson = mockMvc.perform(get("/events/my"))
+                .andExpect(status().is(HttpStatus.OK.value()))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        List<EventDto> eventDtos = objectMapper.readValue(
+                eventsDtoRespJson,
+                new TypeReference<List<EventDto>>() {
+                }
+        );
+
+        org.assertj.core.api.Assertions.assertThat(eventDtos).isEmpty();
+    }
 
     private Location createDummyLocation() {
         return new Location(

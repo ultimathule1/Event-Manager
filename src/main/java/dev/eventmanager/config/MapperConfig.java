@@ -57,6 +57,7 @@ public class MapperConfig {
                         ctx.getSource().status(),
                         ctx.getSource().maxPlaces()
                 ));
+
         return mapper;
     }
 }

@@ -5,12 +5,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.PositiveOrZero;
-import org.springframework.beans.factory.annotation.Value;
+import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
-public record EventUpdateRequestDto(
+public record EventUpdateRequest(
+        @Size(min = 1)
         @JsonProperty("name")
         String eventName,
         @PositiveOrZero

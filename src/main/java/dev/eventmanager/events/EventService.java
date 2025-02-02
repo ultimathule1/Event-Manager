@@ -97,23 +97,17 @@ public class EventService {
 
     public Event updateEvent(
             Long id,
-            EventUpdateRequestDto eventUpdateRequest
+            EventUpdateRequest eventUpdateRequest
     ) {
         EventEntity eventEntity = eventRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Event with id=%s not found"));
-        Location location = locationService.getLocationById(eventUpdateRequest.locationId());
-        User currentUser = getAuthenticatedUser();
 
-        if (currentUser.role() != UserRole.ADMIN || currentUser.id().equals(eventEntity.getOwnerId())) {
+        User currentUser = getAuthenticatedUser();
+        if (currentUser.role() != UserRole.ADMIN && !currentUser.id().equals(eventEntity.getOwnerId())) {
             throw new AuthorizationDeniedException("You do not have permission to update this event");
         }
-        if (eventEntity.getMaxPlaces() > eventUpdateRequest.maxPlaces()) {
-            throw new IllegalArgumentException("The maximum number of places is less than before");
-        }
-        if (location.capacity() == null || location.capacity() < eventUpdateRequest.maxPlaces()) {
-            throw new IllegalArgumentException("The maximum number of place is more than location capacity");
-        }
 
+        validateMaxPlaces(eventEntity, eventUpdateRequest);
         /*
         --------------------------------------------------------------------------
         НУЖНО БУДЕТ ДОДЕЛАТЬ ЭТО МЕСТО КОГДА БУДУТ ЗАРЕГИСТРИРОВАННЫЕ ПОЛЬЗОВАТЕЛИ, Т.Е. ПРОВЕРИТЬ
@@ -127,8 +121,11 @@ public class EventService {
     }
 
     public List<Event> getEventsCreatedByCurrentUser() {
-
-        return null;
+        User currentUser = getAuthenticatedUser();
+        return eventRepository.findAllByOwnerId(currentUser.id())
+                .stream()
+                .map(e -> mapperConfig.getMapper().map(e, Event.class))
+                .toList();
     }
 
     private User getAuthenticatedUser() {
@@ -139,12 +136,33 @@ public class EventService {
         return userService.getUserByLogin(auth.getName());
     }
 
-    private void updateEventEntityFromDto(EventEntity eventEntity, EventUpdateRequestDto dto) {
+    private void updateEventEntityFromDto(EventEntity eventEntity, EventUpdateRequest dto) {
         Optional.ofNullable(dto.eventName()).ifPresent(eventEntity::setName);
         Optional.ofNullable(dto.maxPlaces()).ifPresent(eventEntity::setMaxPlaces);
         Optional.ofNullable(dto.startDate()).ifPresent(eventEntity::setStartDate);
         Optional.ofNullable(dto.cost()).ifPresent(eventEntity::setCost);
         Optional.ofNullable(dto.duration()).ifPresent(eventEntity::setDuration);
         Optional.ofNullable(dto.locationId()).ifPresent(eventEntity::setLocationId);
+    }
+
+    private void validateMaxPlaces(EventEntity eventEntity, EventUpdateRequest dto) {
+        if (dto.maxPlaces() == null) {
+            return;
+        }
+
+        if (eventEntity.getMaxPlaces() > dto.maxPlaces()) {
+            throw new IllegalArgumentException("The maximum number of places cannot be reduced");
+        }
+
+        Long locationId = dto.locationId() == null ? eventEntity.getLocationId() : dto.locationId();
+        if (locationId == null) return;
+
+        try {
+            Location location = locationService.getLocationById(dto.locationId());
+            if (location.capacity() != null && location.capacity() < dto.maxPlaces()) {
+                throw new IllegalArgumentException("The maximum number of event is more than location capacity");
+            }
+        } catch (EntityNotFoundException ignored) {
+        }
     }
 }
