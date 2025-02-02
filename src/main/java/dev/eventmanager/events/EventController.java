@@ -32,10 +32,10 @@ public class EventController {
 
     @PostMapping
     public ResponseEntity<EventDto> createEvent(
-            @RequestBody @Valid EventCreateRequestDto eventCreateRequestDto
+            @RequestBody @Valid EventCreateRequest eventCreateRequest
     ) {
-        log.info("Request to create event: eventCreateRequestDto={}", eventCreateRequestDto);
-        Event event = eventService.createEvent(eventCreateRequestDto);
+        log.info("Request to create event: eventCreateRequest={}", eventCreateRequest);
+        Event event = eventService.createEvent(eventCreateRequest);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -94,4 +94,22 @@ public class EventController {
                 .status(HttpStatus.OK)
                 .body(events);
     }
+
+    @PostMapping("/search")
+    public ResponseEntity<List<EventDto>> searchEvents(
+            @RequestBody EventSearchRequest eventSearchRequest
+    ) {
+        log.info("Request to search events: eventSearchRequest={}", eventSearchRequest);
+        List<Event> eventsList = eventService.searchEvents(eventSearchRequest);
+
+        List<EventDto> eventDtoList = eventsList
+                .stream()
+                .map(e -> mapperConfig.getMapper().map(e, EventDto.class))
+                .toList();
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(eventDtoList);
+    }
+
 }

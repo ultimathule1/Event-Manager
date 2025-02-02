@@ -7,6 +7,7 @@ import dev.eventmanager.users.domain.User;
 import dev.eventmanager.users.domain.UserRole;
 import dev.eventmanager.users.domain.UserService;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -35,22 +36,22 @@ public class EventService {
         this.mapperConfig = mapperConfig;
     }
 
-    public Event createEvent(EventCreateRequestDto eventCreateRequestDto) {
+    public Event createEvent(EventCreateRequest eventCreateRequest) {
         User user = getAuthenticatedUser();
-        if (!locationService.existsLocationById(eventCreateRequestDto.locationId())) {
+        if (!locationService.existsLocationById(eventCreateRequest.locationId())) {
             throw new EntityNotFoundException("Location with this id=%s not found"
-                    .formatted(eventCreateRequestDto.locationId()));
+                    .formatted(eventCreateRequest.locationId()));
         }
 
         EventEntity savedEventEntity = eventRepository.save(new EventEntity(
                 null,
-                eventCreateRequestDto.name(),
-                eventCreateRequestDto.maxPlaces(),
+                eventCreateRequest.name(),
+                eventCreateRequest.maxPlaces(),
                 0,
-                eventCreateRequestDto.date(),
-                eventCreateRequestDto.cost(),
-                eventCreateRequestDto.duration(),
-                eventCreateRequestDto.locationId(),
+                eventCreateRequest.date(),
+                eventCreateRequest.cost(),
+                eventCreateRequest.duration(),
+                eventCreateRequest.locationId(),
                 EventStatus.WAIT_START.name(),
                 user.id()
         ));
@@ -95,6 +96,7 @@ public class EventService {
         eventRepository.save(foundEventEntity);
     }
 
+    @Transactional
     public Event updateEvent(
             Long id,
             EventUpdateRequest eventUpdateRequest
@@ -124,6 +126,26 @@ public class EventService {
         User currentUser = getAuthenticatedUser();
         return eventRepository.findAllByOwnerId(currentUser.id())
                 .stream()
+                .map(e -> mapperConfig.getMapper().map(e, Event.class))
+                .toList();
+    }
+
+    public List<Event> searchEvents(EventSearchRequest eventSearchRequest) {
+        List<EventEntity> eventsList = eventRepository.searchEvents(
+                eventSearchRequest.getName(),
+                eventSearchRequest.getPlacesMin(),
+                eventSearchRequest.getPlacesMax(),
+                eventSearchRequest.getDateStartBefore(),
+                eventSearchRequest.getDateStartAfter(),
+                eventSearchRequest.getCostMin(),
+                eventSearchRequest.getCostMax(),
+                eventSearchRequest.getDurationMin(),
+                eventSearchRequest.getDurationMax(),
+                eventSearchRequest.getLocationId(),
+                eventSearchRequest.getEventStatus()
+        );
+
+        return eventsList.stream()
                 .map(e -> mapperConfig.getMapper().map(e, Event.class))
                 .toList();
     }

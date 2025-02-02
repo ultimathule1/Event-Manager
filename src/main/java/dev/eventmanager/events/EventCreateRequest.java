@@ -9,10 +9,9 @@ import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 
-public record EventCreateRequestDto(
+public record EventCreateRequest(
         @NotEmpty
         String name,
         @NotNull
