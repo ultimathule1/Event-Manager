@@ -2,6 +2,7 @@ package dev.eventmanager.locations;
 
 import dev.eventmanager.RootTest;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,6 +23,11 @@ public class LocationEventControllerTest extends RootTest {
     LocationService locationService;
     @Autowired
     LocationDtoMapper locationDtoMapper;
+
+    @BeforeEach
+    void cleanUp() {
+        locationRepository.deleteAll();
+    }
 
     @Test
     @WithMockUser(username = "admin", authorities = "ADMIN")

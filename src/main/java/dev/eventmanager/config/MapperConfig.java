@@ -1,8 +1,8 @@
 package dev.eventmanager.config;
 
-import dev.eventmanager.events.Event;
-import dev.eventmanager.events.EventDto;
-import dev.eventmanager.events.EventEntity;
+import dev.eventmanager.events.domain.Event;
+import dev.eventmanager.events.api.EventDto;
+import dev.eventmanager.events.db.EventEntity;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.context.annotation.Bean;

@@ -1,7 +1,6 @@
-package dev.eventmanager.events;
+package dev.eventmanager.events.domain;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 
 public record Event(

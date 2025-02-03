@@ -1,4 +1,4 @@
-package dev.eventmanager.events;
+package dev.eventmanager.events.domain;
 
 public enum EventStatus {
     WAIT_START,

@@ -1,6 +1,8 @@
-package dev.eventmanager.events;
+package dev.eventmanager.events.api;
 
 import dev.eventmanager.config.MapperConfig;
+import dev.eventmanager.events.domain.EventService;
+import dev.eventmanager.events.domain.Event;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,10 +34,10 @@ public class EventController {
 
     @PostMapping
     public ResponseEntity<EventDto> createEvent(
-            @RequestBody @Valid EventCreateRequest eventCreateRequest
+            @RequestBody @Valid EventCreateRequestDto eventCreateRequestDto
     ) {
-        log.info("Request to create event: eventCreateRequest={}", eventCreateRequest);
-        Event event = eventService.createEvent(eventCreateRequest);
+        log.info("Request to create event: eventCreateRequestDto={}", eventCreateRequestDto);
+        Event event = eventService.createEvent(eventCreateRequestDto);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -97,10 +99,10 @@ public class EventController {
 
     @PostMapping("/search")
     public ResponseEntity<List<EventDto>> searchEvents(
-            @RequestBody EventSearchRequest eventSearchRequest
+            @RequestBody EventSearchRequestDto eventSearchRequestDto
     ) {
-        log.info("Request to search events: eventSearchRequest={}", eventSearchRequest);
-        List<Event> eventsList = eventService.searchEvents(eventSearchRequest);
+        log.info("Request to search events: eventSearchRequestDto={}", eventSearchRequestDto);
+        List<Event> eventsList = eventService.searchEvents(eventSearchRequestDto);
 
         List<EventDto> eventDtoList = eventsList
                 .stream()
@@ -111,5 +113,4 @@ public class EventController {
                 .status(HttpStatus.OK)
                 .body(eventDtoList);
     }
-
 }

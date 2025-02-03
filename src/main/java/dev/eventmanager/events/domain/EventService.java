@@ -1,6 +1,11 @@
-package dev.eventmanager.events;
+package dev.eventmanager.events.domain;
 
 import dev.eventmanager.config.MapperConfig;
+import dev.eventmanager.events.api.EventCreateRequestDto;
+import dev.eventmanager.events.api.EventSearchRequestDto;
+import dev.eventmanager.events.api.EventUpdateRequest;
+import dev.eventmanager.events.db.EventEntity;
+import dev.eventmanager.events.db.EventRepository;
 import dev.eventmanager.locations.Location;
 import dev.eventmanager.locations.LocationService;
 import dev.eventmanager.users.domain.User;
@@ -36,22 +41,22 @@ public class EventService {
         this.mapperConfig = mapperConfig;
     }
 
-    public Event createEvent(EventCreateRequest eventCreateRequest) {
+    public Event createEvent(EventCreateRequestDto eventCreateRequestDto) {
         User user = getAuthenticatedUser();
-        if (!locationService.existsLocationById(eventCreateRequest.locationId())) {
+        if (!locationService.existsLocationById(eventCreateRequestDto.locationId())) {
             throw new EntityNotFoundException("Location with this id=%s not found"
-                    .formatted(eventCreateRequest.locationId()));
+                    .formatted(eventCreateRequestDto.locationId()));
         }
 
         EventEntity savedEventEntity = eventRepository.save(new EventEntity(
                 null,
-                eventCreateRequest.name(),
-                eventCreateRequest.maxPlaces(),
+                eventCreateRequestDto.name(),
+                eventCreateRequestDto.maxPlaces(),
                 0,
-                eventCreateRequest.date(),
-                eventCreateRequest.cost(),
-                eventCreateRequest.duration(),
-                eventCreateRequest.locationId(),
+                eventCreateRequestDto.date(),
+                eventCreateRequestDto.cost(),
+                eventCreateRequestDto.duration(),
+                eventCreateRequestDto.locationId(),
                 EventStatus.WAIT_START.name(),
                 user.id()
         ));
@@ -130,19 +135,19 @@ public class EventService {
                 .toList();
     }
 
-    public List<Event> searchEvents(EventSearchRequest eventSearchRequest) {
+    public List<Event> searchEvents(EventSearchRequestDto eventSearchRequestDto) {
         List<EventEntity> eventsList = eventRepository.searchEvents(
-                eventSearchRequest.getName(),
-                eventSearchRequest.getPlacesMin(),
-                eventSearchRequest.getPlacesMax(),
-                eventSearchRequest.getDateStartBefore(),
-                eventSearchRequest.getDateStartAfter(),
-                eventSearchRequest.getCostMin(),
-                eventSearchRequest.getCostMax(),
-                eventSearchRequest.getDurationMin(),
-                eventSearchRequest.getDurationMax(),
-                eventSearchRequest.getLocationId(),
-                eventSearchRequest.getEventStatus()
+                eventSearchRequestDto.getName(),
+                eventSearchRequestDto.getPlacesMin(),
+                eventSearchRequestDto.getPlacesMax(),
+                eventSearchRequestDto.getDateStartBefore(),
+                eventSearchRequestDto.getDateStartAfter(),
+                eventSearchRequestDto.getCostMin(),
+                eventSearchRequestDto.getCostMax(),
+                eventSearchRequestDto.getDurationMin(),
+                eventSearchRequestDto.getDurationMax(),
+                eventSearchRequestDto.getLocationId(),
+                eventSearchRequestDto.getEventStatus()
         );
 
         return eventsList.stream()

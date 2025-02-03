@@ -2,9 +2,19 @@ package dev.eventmanager.events;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import dev.eventmanager.RootTest;
+import dev.eventmanager.events.api.EventCreateRequestDto;
+import dev.eventmanager.events.api.EventDto;
+import dev.eventmanager.events.api.EventSearchRequestDto;
+import dev.eventmanager.events.api.EventUpdateRequest;
+import dev.eventmanager.events.db.EventRepository;
+import dev.eventmanager.events.domain.Event;
+import dev.eventmanager.events.domain.EventService;
+import dev.eventmanager.events.domain.EventStatus;
 import dev.eventmanager.locations.Location;
+import dev.eventmanager.locations.LocationRepository;
 import dev.eventmanager.locations.LocationService;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -30,6 +40,18 @@ public class EventControllerTest extends RootTest {
 
     @Autowired
     private EventService eventService;
+
+    @Autowired
+    private EventRepository eventRepository;
+
+    @Autowired
+    private LocationRepository locationRepository;
+
+    @BeforeEach
+    void cleanUp() {
+        eventRepository.deleteAll();
+        locationRepository.deleteAll();
+    }
 
     @Test
     @WithMockUser(username = "user", authorities = "USER")
@@ -78,7 +100,7 @@ public class EventControllerTest extends RootTest {
     @WithMockUser(username = "user", authorities = "USER")
     void shouldFailCreateEventBecauseInvalidEventValues() throws Exception {
         Location savedLocation = locationService.createLocation(createDummyLocation());
-        var eventCreateRequestDto = new EventCreateRequest(
+        var eventCreateRequestDto = new EventCreateRequestDto(
                 "Joker <?> Java Problem conference",
                 500,
                 OffsetDateTime
@@ -104,7 +126,7 @@ public class EventControllerTest extends RootTest {
     void shouldFailCreateEventBecauseNotFoundLocation() throws Exception {
         Location savedLocation = locationService.createLocation(createDummyLocation());
 
-        var eventCreateRequestDto = new EventCreateRequest(
+        var eventCreateRequestDto = new EventCreateRequestDto(
                 "Joker <?> Java Problem conference",
                 500,
                 OffsetDateTime
@@ -331,19 +353,19 @@ public class EventControllerTest extends RootTest {
                 .getResponse()
                 .getContentAsString();
 
-        List<EventDto> eventDtos = objectMapper.readValue(
+        List<EventDto> eventDto = objectMapper.readValue(
                 eventsDtoRespJson,
                 new TypeReference<List<EventDto>>() {
                 }
         );
 
-        org.assertj.core.api.Assertions.assertThat(eventDtos).hasSize(2);
+        org.assertj.core.api.Assertions.assertThat(eventDto).hasSize(2);
         org.assertj.core.api.Assertions.assertThat(mapperConfig.getMapper().map(savedEvent, EventDto.class))
                 .usingRecursiveComparison()
-                .isEqualTo(eventDtos.getFirst());
+                .isEqualTo(eventDto.getFirst());
         org.assertj.core.api.Assertions.assertThat(mapperConfig.getMapper().map(savedEvent2, EventDto.class))
                 .usingRecursiveComparison()
-                .isEqualTo(eventDtos.getLast());
+                .isEqualTo(eventDto.getLast());
     }
 
     @Test
@@ -355,13 +377,13 @@ public class EventControllerTest extends RootTest {
                 .getResponse()
                 .getContentAsString();
 
-        List<EventDto> eventDtos = objectMapper.readValue(
+        List<EventDto> eventDto = objectMapper.readValue(
                 eventsDtoRespJson,
                 new TypeReference<List<EventDto>>() {
                 }
         );
 
-        org.assertj.core.api.Assertions.assertThat(eventDtos).isEmpty();
+        org.assertj.core.api.Assertions.assertThat(eventDto).isEmpty();
     }
 
     @Test
@@ -370,7 +392,7 @@ public class EventControllerTest extends RootTest {
         Location savedLocation = locationService.createLocation(createDummyLocation());
         Location savedLocation2 = locationService.createLocation(createDummyLocation());
         var eventCreateRequestDto = createDummyEventCreateRequestDto(savedLocation.id());
-        var eventCreateRequestDto2 = new EventCreateRequest(
+        var eventCreateRequestDto2 = new EventCreateRequestDto(
                 "Unix",
                 400,
                 OffsetDateTime
@@ -383,7 +405,7 @@ public class EventControllerTest extends RootTest {
                 savedLocation.id()
         );
         var eventCreateRequestDto_ = createDummyEventCreateRequestDto(savedLocation2.id());
-        var eventCreateRequestDto_2 = new EventCreateRequest(
+        var eventCreateRequestDto_2 = new EventCreateRequestDto(
                 "SQL",
                 500,
                 OffsetDateTime
@@ -400,7 +422,7 @@ public class EventControllerTest extends RootTest {
         Event savedEvent3 = eventService.createEvent(eventCreateRequestDto_);
         Event savedEvent4 = eventService.createEvent(eventCreateRequestDto_2);
 
-        EventSearchRequest eventSearchRequest = new EventSearchRequest(
+        EventSearchRequestDto eventSearchRequestDto = new EventSearchRequestDto(
                 null,
                 300,
                 450,
@@ -416,7 +438,7 @@ public class EventControllerTest extends RootTest {
 
         String eventsRespJson = mockMvc.perform(post("/events/search")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(eventSearchRequest)))
+                        .content(objectMapper.writeValueAsString(eventSearchRequestDto)))
                 .andExpect(status().is(HttpStatus.OK.value()))
                 .andReturn()
                 .getResponse()
@@ -437,7 +459,7 @@ public class EventControllerTest extends RootTest {
         Location savedLocation = locationService.createLocation(createDummyLocation());
         Location savedLocation2 = locationService.createLocation(createDummyLocation());
         var eventCreateRequestDto = createDummyEventCreateRequestDto(savedLocation.id());
-        var eventCreateRequestDto2 = new EventCreateRequest(
+        var eventCreateRequestDto2 = new EventCreateRequestDto(
                 "Unix",
                 400,
                 OffsetDateTime
@@ -450,7 +472,7 @@ public class EventControllerTest extends RootTest {
                 savedLocation.id()
         );
         var eventCreateRequestDto_ = createDummyEventCreateRequestDto(savedLocation2.id());
-        var eventCreateRequestDto_2 = new EventCreateRequest(
+        var eventCreateRequestDto_2 = new EventCreateRequestDto(
                 "SQL",
                 500,
                 OffsetDateTime
@@ -467,7 +489,7 @@ public class EventControllerTest extends RootTest {
         Event savedEvent3 = eventService.createEvent(eventCreateRequestDto_);
         Event savedEvent4 = eventService.createEvent(eventCreateRequestDto_2);
 
-        EventSearchRequest eventSearchRequest = new EventSearchRequest(
+        EventSearchRequestDto eventSearchRequestDto = new EventSearchRequestDto(
                 null,
                 null,
                 null,
@@ -483,7 +505,7 @@ public class EventControllerTest extends RootTest {
 
         String eventsRespJson = mockMvc.perform(post("/events/search")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(eventSearchRequest)))
+                        .content(objectMapper.writeValueAsString(eventSearchRequestDto)))
                 .andExpect(status().is(HttpStatus.OK.value()))
                 .andReturn()
                 .getResponse()
@@ -508,8 +530,8 @@ public class EventControllerTest extends RootTest {
         );
     }
 
-    private EventCreateRequest createDummyEventCreateRequestDto(Long locationId) {
-        return new EventCreateRequest(
+    private EventCreateRequestDto createDummyEventCreateRequestDto(Long locationId) {
+        return new EventCreateRequestDto(
                 "Joker <?> Java Problem conference",
                 300,
                 OffsetDateTime

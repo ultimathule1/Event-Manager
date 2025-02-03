@@ -1,20 +1,17 @@
-package dev.eventmanager.events;
+package dev.eventmanager.events.api;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.Optional;
 
 @Getter
-public class EventSearchRequest {
+public class EventSearchRequestDto {
     @JsonProperty("name")
     private final String name;
     private final Integer placesMin;
@@ -40,7 +37,7 @@ public class EventSearchRequest {
     private static final Integer DEFAULT_DURATION_MIN = 0;
     private static final Integer DEFAULT_DURATION_MAX = 1_000_000;
 
-    public EventSearchRequest(String name, Integer placesMin, Integer placesMax, OffsetDateTime dateStartBefore, OffsetDateTime dateStartAfter, BigDecimal costMin, BigDecimal costMax, Integer durationMin, Integer durationMax, Integer locationId, String eventStatus) {
+    public EventSearchRequestDto(String name, Integer placesMin, Integer placesMax, OffsetDateTime dateStartBefore, OffsetDateTime dateStartAfter, BigDecimal costMin, BigDecimal costMax, Integer durationMin, Integer durationMax, Integer locationId, String eventStatus) {
         this.name = name;
         this.placesMin = placesMin == null ? DEFAULT_PLACES_MIN : placesMin;
         this.placesMax = placesMax == null ? DEFAULT_PLACES_MAX : placesMax;
@@ -56,7 +53,7 @@ public class EventSearchRequest {
 
     @Override
     public String toString() {
-        return "EventSearchRequest{" +
+        return "EventSearchRequestDto{" +
                 "name='" + name + '\'' +
                 ", placesMin=" + placesMin +
                 ", placesMax=" + placesMax +

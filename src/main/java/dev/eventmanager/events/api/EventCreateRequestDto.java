@@ -1,4 +1,4 @@
-package dev.eventmanager.events;
+package dev.eventmanager.events.api;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.Future;
@@ -11,7 +11,7 @@ import jakarta.validation.constraints.PositiveOrZero;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
-public record EventCreateRequest(
+public record EventCreateRequestDto(
         @NotEmpty
         String name,
         @NotNull

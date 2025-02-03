@@ -1,4 +1,4 @@
-package dev.eventmanager.events;
+package dev.eventmanager.events.api;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
