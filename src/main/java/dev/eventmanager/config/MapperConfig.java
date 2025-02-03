@@ -3,6 +3,7 @@ package dev.eventmanager.config;
 import dev.eventmanager.events.domain.Event;
 import dev.eventmanager.events.api.EventDto;
 import dev.eventmanager.events.db.EventEntity;
+import dev.eventmanager.events.domain.RegistrationEventUser;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.context.annotation.Bean;
@@ -20,7 +21,10 @@ public class MapperConfig {
                 .setConverter(ctx -> new Event(
                         ctx.getSource().getId(),
                         ctx.getSource().getName(),
-                        ctx.getSource().getOccupiedPlaces(),
+                        ctx.getSource().getRegistrations()
+                                .stream()
+                                .map(e -> new RegistrationEventUser(e.getId(),e.getUserId(),e.getEvent().getId()))
+                                .toList(),
                         ctx.getSource().getStartDate(),
                         ctx.getSource().getDuration(),
                         ctx.getSource().getCost(),
@@ -37,26 +41,26 @@ public class MapperConfig {
                         ctx.getSource().maxPlaces(),
                         ctx.getSource().startDate(),
                         ctx.getSource().cost(),
-                        ctx.getSource().occupiedPlaces(),
+                        ctx.getSource().registrations().size(),
                         ctx.getSource().duration(),
                         ctx.getSource().locationId(),
                         ctx.getSource().ownerId(),
                         ctx.getSource().status()
                 ));
 
-        mapper.createTypeMap(EventDto.class, Event.class)
-                .setConverter(ctx -> new Event(
-                        ctx.getSource().id(),
-                        ctx.getSource().name(),
-                        ctx.getSource().occupiedPlaces(),
-                        ctx.getSource().date(),
-                        ctx.getSource().duration(),
-                        ctx.getSource().cost(),
-                        ctx.getSource().ownerId(),
-                        ctx.getSource().locationId(),
-                        ctx.getSource().status(),
-                        ctx.getSource().maxPlaces()
-                ));
+//        mapper.createTypeMap(EventDto.class, Event.class)
+//                .setConverter(ctx -> new Event(
+//                        ctx.getSource().id(),
+//                        ctx.getSource().name(),
+//                        ctx.getSource().occupiedPlaces(),
+//                        ctx.getSource().date(),
+//                        ctx.getSource().duration(),
+//                        ctx.getSource().cost(),
+//                        ctx.getSource().ownerId(),
+//                        ctx.getSource().locationId(),
+//                        ctx.getSource().status(),
+//                        ctx.getSource().maxPlaces()
+//                ));
 
         return mapper;
     }

@@ -5,7 +5,7 @@ import dev.eventmanager.RootTest;
 import dev.eventmanager.events.api.EventCreateRequestDto;
 import dev.eventmanager.events.api.EventDto;
 import dev.eventmanager.events.api.EventSearchRequestDto;
-import dev.eventmanager.events.api.EventUpdateRequest;
+import dev.eventmanager.events.api.EventUpdateRequestDto;
 import dev.eventmanager.events.db.EventRepository;
 import dev.eventmanager.events.domain.Event;
 import dev.eventmanager.events.domain.EventService;
@@ -162,9 +162,15 @@ public class EventControllerTest extends RootTest {
 
         EventDto eventDtoResp = objectMapper.readValue(eventDtoJsonResp, EventDto.class);
 
-        org.assertj.core.api.Assertions.assertThat(mapperConfig.getMapper().map(eventDtoResp, Event.class))
-                .usingRecursiveComparison()
-                .isEqualTo(savedEvent);
+        Assertions.assertEquals(eventDtoResp.id(), savedEvent.id());
+        Assertions.assertEquals(eventDtoResp.locationId(), savedEvent.locationId());
+        Assertions.assertEquals(eventDtoResp.status(), savedEvent.status());
+        Assertions.assertEquals(eventDtoResp.occupiedPlaces(), savedEvent.registrations().size());
+        Assertions.assertEquals(eventDtoResp.ownerId(), savedEvent.ownerId());
+        Assertions.assertEquals(eventDtoResp.date(), savedEvent.startDate());
+        Assertions.assertEquals(eventDtoResp.maxPlaces(), savedEvent.maxPlaces());
+        Assertions.assertEquals(eventDtoResp.cost(), savedEvent.cost());
+        Assertions.assertEquals(eventDtoResp.name(), savedEvent.name());
     }
 
     @Test
@@ -188,7 +194,7 @@ public class EventControllerTest extends RootTest {
         mockMvc.perform(delete("/events/%s".formatted(savedEvent.id())))
                 .andExpect(status().is(HttpStatus.NO_CONTENT.value()));
 
-        var cancelledEvent = eventService.getEventById(savedEvent.id());
+        Event cancelledEvent = eventService.getEventById(savedEvent.id());
 
         org.assertj.core.api.Assertions.assertThat(cancelledEvent)
                 .usingRecursiveComparison()
@@ -216,7 +222,7 @@ public class EventControllerTest extends RootTest {
         var eventCreateRequestDto = createDummyEventCreateRequestDto(savedLocation.id());
         Event savedEvent = eventService.createEvent(eventCreateRequestDto);
 
-        var eventUpdateRequestDto = new EventUpdateRequest(
+        var eventUpdateRequestDto = new EventUpdateRequestDto(
                 "new Event",
                 400,
                 OffsetDateTime
@@ -243,7 +249,7 @@ public class EventControllerTest extends RootTest {
         Assertions.assertEquals(savedEvent.status(), updatedEvent.status());
         Assertions.assertEquals(savedEvent.ownerId(), updatedEvent.ownerId());
         Assertions.assertEquals(savedEvent.id(), updatedEvent.id());
-        Assertions.assertEquals(savedEvent.occupiedPlaces(), updatedEvent.occupiedPlaces());
+        Assertions.assertEquals(savedEvent.registrations().size(), updatedEvent.occupiedPlaces());
 
         Assertions.assertEquals(eventUpdateRequestDto.eventName(), updatedEvent.name());
         Assertions.assertEquals(eventUpdateRequestDto.maxPlaces(), updatedEvent.maxPlaces());
@@ -260,7 +266,7 @@ public class EventControllerTest extends RootTest {
         var eventCreateRequestDto = createDummyEventCreateRequestDto(savedLocation.id());
         Event savedEvent = eventService.createEvent(eventCreateRequestDto);
 
-        var eventUpdateRequestDto = new EventUpdateRequest(
+        var eventUpdateRequestDto = new EventUpdateRequestDto(
                 "About New Something",
                 null,
                 null,
@@ -294,7 +300,7 @@ public class EventControllerTest extends RootTest {
         var eventCreateRequestDto = createDummyEventCreateRequestDto(savedLocation.id());
         Event savedEvent = eventService.createEvent(eventCreateRequestDto);
 
-        var eventUpdateRequestDto = new EventUpdateRequest(
+        var eventUpdateRequestDto = new EventUpdateRequestDto(
                 "new Event",
                 299,
                 OffsetDateTime
@@ -320,7 +326,7 @@ public class EventControllerTest extends RootTest {
         var eventCreateRequestDto = createDummyEventCreateRequestDto(savedLocation.id());
         Event savedEvent = eventService.createEvent(eventCreateRequestDto);
 
-        var eventUpdateRequestDto = new EventUpdateRequest(
+        var eventUpdateRequestDto = new EventUpdateRequestDto(
                 "new Event",
                 299,
                 OffsetDateTime

@@ -3,7 +3,7 @@ package dev.eventmanager.events.domain;
 import dev.eventmanager.config.MapperConfig;
 import dev.eventmanager.events.api.EventCreateRequestDto;
 import dev.eventmanager.events.api.EventSearchRequestDto;
-import dev.eventmanager.events.api.EventUpdateRequest;
+import dev.eventmanager.events.api.EventUpdateRequestDto;
 import dev.eventmanager.events.db.EventEntity;
 import dev.eventmanager.events.db.EventRepository;
 import dev.eventmanager.locations.Location;
@@ -18,6 +18,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -52,13 +53,13 @@ public class EventService {
                 null,
                 eventCreateRequestDto.name(),
                 eventCreateRequestDto.maxPlaces(),
-                0,
                 eventCreateRequestDto.date(),
                 eventCreateRequestDto.cost(),
                 eventCreateRequestDto.duration(),
                 eventCreateRequestDto.locationId(),
                 EventStatus.WAIT_START.name(),
-                user.id()
+                user.id(),
+                new ArrayList<>()
         ));
 
         return mapperConfig.getMapper().map(savedEventEntity, Event.class);
@@ -66,7 +67,7 @@ public class EventService {
 
     public Event getEventById(Long id) {
         EventEntity event = eventRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Event with id=%s not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Event with id=%s not found".formatted(id)));
 
         return mapperConfig
                 .getMapper()
@@ -104,7 +105,7 @@ public class EventService {
     @Transactional
     public Event updateEvent(
             Long id,
-            EventUpdateRequest eventUpdateRequest
+            EventUpdateRequestDto eventUpdateRequestDto
     ) {
         EventEntity eventEntity = eventRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Event with id=%s not found"));
@@ -114,7 +115,7 @@ public class EventService {
             throw new AuthorizationDeniedException("You do not have permission to update this event");
         }
 
-        validateMaxPlaces(eventEntity, eventUpdateRequest);
+        validateMaxPlaces(eventEntity, eventUpdateRequestDto);
         /*
         --------------------------------------------------------------------------
         НУЖНО БУДЕТ ДОДЕЛАТЬ ЭТО МЕСТО КОГДА БУДУТ ЗАРЕГИСТРИРОВАННЫЕ ПОЛЬЗОВАТЕЛИ, Т.Е. ПРОВЕРИТЬ
@@ -122,7 +123,7 @@ public class EventService {
         --------------------------------------------------------------------------
          */
 
-        updateEventEntityFromDto(eventEntity, eventUpdateRequest);
+        updateEventEntityFromDto(eventEntity, eventUpdateRequestDto);
         eventRepository.save(eventEntity);
         return mapperConfig.getMapper().map(eventEntity, Event.class);
     }
@@ -137,22 +138,26 @@ public class EventService {
 
     public List<Event> searchEvents(EventSearchRequestDto eventSearchRequestDto) {
         List<EventEntity> eventsList = eventRepository.searchEvents(
-                eventSearchRequestDto.getName(),
-                eventSearchRequestDto.getPlacesMin(),
-                eventSearchRequestDto.getPlacesMax(),
-                eventSearchRequestDto.getDateStartBefore(),
-                eventSearchRequestDto.getDateStartAfter(),
-                eventSearchRequestDto.getCostMin(),
-                eventSearchRequestDto.getCostMax(),
-                eventSearchRequestDto.getDurationMin(),
-                eventSearchRequestDto.getDurationMax(),
-                eventSearchRequestDto.getLocationId(),
-                eventSearchRequestDto.getEventStatus()
+                eventSearchRequestDto.name(),
+                eventSearchRequestDto.placesMin(),
+                eventSearchRequestDto.placesMax(),
+                eventSearchRequestDto.dateStartBefore(),
+                eventSearchRequestDto.dateStartAfter(),
+                eventSearchRequestDto.costMin(),
+                eventSearchRequestDto.costMax(),
+                eventSearchRequestDto.durationMin(),
+                eventSearchRequestDto.durationMax(),
+                eventSearchRequestDto.locationId(),
+                eventSearchRequestDto.eventStatus()
         );
 
         return eventsList.stream()
                 .map(e -> mapperConfig.getMapper().map(e, Event.class))
                 .toList();
+    }
+
+    public boolean existsById(Long id) {
+        return eventRepository.existsById(id);
     }
 
     private User getAuthenticatedUser() {
@@ -163,7 +168,7 @@ public class EventService {
         return userService.getUserByLogin(auth.getName());
     }
 
-    private void updateEventEntityFromDto(EventEntity eventEntity, EventUpdateRequest dto) {
+    private void updateEventEntityFromDto(EventEntity eventEntity, EventUpdateRequestDto dto) {
         Optional.ofNullable(dto.eventName()).ifPresent(eventEntity::setName);
         Optional.ofNullable(dto.maxPlaces()).ifPresent(eventEntity::setMaxPlaces);
         Optional.ofNullable(dto.startDate()).ifPresent(eventEntity::setStartDate);
@@ -172,7 +177,7 @@ public class EventService {
         Optional.ofNullable(dto.locationId()).ifPresent(eventEntity::setLocationId);
     }
 
-    private void validateMaxPlaces(EventEntity eventEntity, EventUpdateRequest dto) {
+    private void validateMaxPlaces(EventEntity eventEntity, EventUpdateRequestDto dto) {
         if (dto.maxPlaces() == null) {
             return;
         }

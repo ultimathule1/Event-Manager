@@ -2,7 +2,6 @@ package dev.eventmanager.events.api;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Getter;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -10,24 +9,13 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 
-@Getter
-public class EventSearchRequestDto {
-    @JsonProperty("name")
-    private final String name;
-    private final Integer placesMin;
-    private final Integer placesMax;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
-    private final OffsetDateTime dateStartBefore;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
-    private final OffsetDateTime dateStartAfter;
-    private final BigDecimal costMin;
-    private final BigDecimal costMax;
-    private final Integer durationMin;
-    @JsonProperty("durationMax")
-    private final Integer durationMax;
-    private final Integer locationId;
-    private final String eventStatus;
-
+public record EventSearchRequestDto(
+        @JsonProperty("name") String name, Integer placesMin, Integer placesMax,
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX") OffsetDateTime dateStartBefore,
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX") OffsetDateTime dateStartAfter,
+        BigDecimal costMin, BigDecimal costMax, Integer durationMin,
+        @JsonProperty("durationMax") Integer durationMax, Integer locationId,
+        String eventStatus) {
     private static final Integer DEFAULT_PLACES_MIN = 0;
     private static final Integer DEFAULT_PLACES_MAX = 1000;
     private static final OffsetDateTime DEFAULT_DATE_START_BEFORE = OffsetDateTime.ofInstant(Instant.EPOCH, ZoneOffset.UTC);
