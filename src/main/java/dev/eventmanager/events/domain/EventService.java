@@ -8,6 +8,7 @@ import dev.eventmanager.events.db.EventEntity;
 import dev.eventmanager.events.db.EventRepository;
 import dev.eventmanager.locations.Location;
 import dev.eventmanager.locations.LocationService;
+import dev.eventmanager.users.domain.AuthenticationUserService;
 import dev.eventmanager.users.domain.User;
 import dev.eventmanager.users.domain.UserRole;
 import dev.eventmanager.users.domain.UserService;
@@ -27,23 +28,23 @@ public class EventService {
 
     private final EventRepository eventRepository;
     private final LocationService locationService;
-    private final UserService userService;
     private final MapperConfig mapperConfig;
+    private final AuthenticationUserService authenticationUserService;
 
     public EventService(
             EventRepository eventRepository,
             LocationService locationService,
-            UserService userService,
-            MapperConfig mapperConfig) {
+            MapperConfig mapperConfig,
+            AuthenticationUserService authenticationUserService) {
 
         this.eventRepository = eventRepository;
         this.locationService = locationService;
-        this.userService = userService;
         this.mapperConfig = mapperConfig;
+        this.authenticationUserService = authenticationUserService;
     }
 
     public Event createEvent(EventCreateRequestDto eventCreateRequestDto) {
-        User user = getAuthenticatedUser();
+        User user = authenticationUserService.getAuthenticatedUser();
         if (!locationService.existsLocationById(eventCreateRequestDto.locationId())) {
             throw new EntityNotFoundException("Location with this id=%s not found"
                     .formatted(eventCreateRequestDto.locationId()));
@@ -65,10 +66,11 @@ public class EventService {
         return mapperConfig.getMapper().map(savedEventEntity, Event.class);
     }
 
+    @Transactional
     public Event getEventById(Long id) {
         EventEntity event = eventRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Event with id=%s not found".formatted(id)));
-
+        System.out.println(event.getRegistrations());
         return mapperConfig
                 .getMapper()
                 .map(event, Event.class);
@@ -82,7 +84,7 @@ public class EventService {
      * @param eventId
      */
     public void deleteEvent(Long eventId) {
-        User currentUser = getAuthenticatedUser();
+        User currentUser = authenticationUserService.getAuthenticatedUser();
 
         EventEntity foundEventEntity = eventRepository.findById(eventId)
                 .orElseThrow(() -> new EntityNotFoundException("Event with id=%s not found"));
@@ -110,7 +112,7 @@ public class EventService {
         EventEntity eventEntity = eventRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Event with id=%s not found"));
 
-        User currentUser = getAuthenticatedUser();
+        User currentUser = authenticationUserService.getAuthenticatedUser();
         if (currentUser.role() != UserRole.ADMIN && !currentUser.id().equals(eventEntity.getOwnerId())) {
             throw new AuthorizationDeniedException("You do not have permission to update this event");
         }
@@ -129,7 +131,7 @@ public class EventService {
     }
 
     public List<Event> getEventsCreatedByCurrentUser() {
-        User currentUser = getAuthenticatedUser();
+        User currentUser = authenticationUserService.getAuthenticatedUser();
         return eventRepository.findAllByOwnerId(currentUser.id())
                 .stream()
                 .map(e -> mapperConfig.getMapper().map(e, Event.class))
@@ -158,14 +160,6 @@ public class EventService {
 
     public boolean existsById(Long id) {
         return eventRepository.existsById(id);
-    }
-
-    private User getAuthenticatedUser() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || !auth.isAuthenticated()) {
-            throw new SecurityException("You are not logged in");
-        }
-        return userService.getUserByLogin(auth.getName());
     }
 
     private void updateEventEntityFromDto(EventEntity eventEntity, EventUpdateRequestDto dto) {

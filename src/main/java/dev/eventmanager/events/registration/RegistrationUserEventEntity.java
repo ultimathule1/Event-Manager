@@ -1,5 +1,6 @@
-package dev.eventmanager.events.db;
+package dev.eventmanager.events.registration;
 
+import dev.eventmanager.events.db.EventEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -13,6 +14,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 @Entity
 @Table(name = "registrations")
@@ -20,7 +22,8 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class RegistrationEventUserEntity {
+@ToString
+public class RegistrationUserEventEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -1,5 +1,7 @@
 package dev.eventmanager.events.domain;
 
+import dev.eventmanager.events.registration.RegistrationUserEvent;
+
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -7,7 +9,7 @@ import java.util.List;
 public record Event(
         Long id,
         String name,
-        List<RegistrationEventUser> registrations,
+        List<RegistrationUserEvent> registrations,
         OffsetDateTime startDate,
         int duration,
         BigDecimal cost,

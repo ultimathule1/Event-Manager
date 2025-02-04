@@ -1,5 +1,6 @@
 package dev.eventmanager.events.db;
 
+import dev.eventmanager.events.registration.RegistrationUserEventEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -44,5 +45,5 @@ public class EventEntity {
     @Column(name = "owner_id")
     private Long ownerId;
     @OneToMany(mappedBy = "event")
-    private List<RegistrationEventUserEntity> registrations;
+    private List<RegistrationUserEventEntity> registrations;
 }
