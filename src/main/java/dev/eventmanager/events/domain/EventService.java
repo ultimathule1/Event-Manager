@@ -118,12 +118,10 @@ public class EventService {
         }
 
         validateMaxPlaces(eventEntity, eventUpdateRequestDto);
-        /*
-        --------------------------------------------------------------------------
-        НУЖНО БУДЕТ ДОДЕЛАТЬ ЭТО МЕСТО КОГДА БУДУТ ЗАРЕГИСТРИРОВАННЫЕ ПОЛЬЗОВАТЕЛИ, Т.Е. ПРОВЕРИТЬ
-        МОЖЕТ ЛИ LOCATION.ID() ВМЕСТИТЬ УЖЕ ЗАРЕГИСТРИРОВАННЫХ ПОЛЬЗОВАТЕЛЕЙ.
-        --------------------------------------------------------------------------
-         */
+
+        if (eventEntity.getRegistrations().size() > eventUpdateRequestDto.maxPlaces()) {
+            throw new IllegalArgumentException("registered users more than the maximum number at the event");
+        }
 
         updateEventEntityFromDto(eventEntity, eventUpdateRequestDto);
         eventRepository.save(eventEntity);
