@@ -559,7 +559,7 @@ public class EventControllerTest extends RootTest {
         Location savedLocation = locationService.createLocation(createDummyLocation());
         var eventCreateRequestDto = createDummyEventCreateRequestDto(savedLocation.id());
         Event savedEvent = eventService.createEvent(eventCreateRequestDto);
-        registrationService.registerCurrentUserForEvent();
+//        registrationService.registerCurrentUserForEvent();
 
 
     }

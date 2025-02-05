@@ -24,7 +24,7 @@ public class MapperConfig {
                         ctx.getSource().getName(),
                         ctx.getSource().getRegistrations()
                                 .stream()
-                                .map(e -> new RegistrationUserEvent(e.getId(),e.getUserId(),e.getEvent().getId()))
+                                .map(e -> new RegistrationUserEvent(e.getId(), e.getUserId(), e.getEvent().getId()))
                                 .toList(),
                         ctx.getSource().getStartDate(),
                         ctx.getSource().getDuration(),
@@ -47,6 +47,20 @@ public class MapperConfig {
                         ctx.getSource().locationId(),
                         ctx.getSource().ownerId(),
                         ctx.getSource().status()
+                ));
+
+        mapper.createTypeMap(EventEntity.class, EventDto.class)
+                .setConverter(ctx -> new EventDto(
+                        ctx.getSource().getId(),
+                        ctx.getSource().getName(),
+                        ctx.getSource().getMaxPlaces(),
+                        ctx.getSource().getStartDate(),
+                        ctx.getSource().getCost(),
+                        ctx.getSource().getRegistrations().size(),
+                        ctx.getSource().getDuration(),
+                        ctx.getSource().getLocationId(),
+                        ctx.getSource().getOwnerId(),
+                        ctx.getSource().getStatus()
                 ));
 
         mapper.createTypeMap(RegistrationUserEventEntity.class, RegistrationUserEvent.class)

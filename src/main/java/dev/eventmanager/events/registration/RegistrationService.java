@@ -1,5 +1,8 @@
 package dev.eventmanager.events.registration;
 
+import dev.eventmanager.config.MapperConfig;
+import dev.eventmanager.events.api.EventDto;
+import dev.eventmanager.events.db.EventEntity;
 import dev.eventmanager.events.db.EventRepository;
 import dev.eventmanager.events.domain.Event;
 import dev.eventmanager.events.domain.EventService;
@@ -9,20 +12,24 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class RegistrationService {
 
     private final RegistrationRepository registrationRepository;
     private final EventService eventService;
     private final EventRepository eventRepository;
+    private final MapperConfig mapperConfig;
 
     public RegistrationService(
             RegistrationRepository registrationRepository,
             EventService eventService,
-            EventRepository eventRepository) {
+            EventRepository eventRepository, MapperConfig mapperConfig) {
         this.registrationRepository = registrationRepository;
         this.eventService = eventService;
         this.eventRepository = eventRepository;
+        this.mapperConfig = mapperConfig;
     }
 
     @Transactional
@@ -71,5 +78,15 @@ public class RegistrationService {
         }
 
         registrationRepository.deleteById(registrationEntity.getId());
+    }
+
+    public List<EventDto> getAllEventWhereUserRegistered(User user) {
+        List<EventEntity> eventsEntity =
+                registrationRepository.findAllEventsWhereUserRegistered(user.id());
+
+        return eventsEntity
+                .stream()
+                .map(e -> mapperConfig.getMapper().map(e, EventDto.class))
+                .toList();
     }
 }
