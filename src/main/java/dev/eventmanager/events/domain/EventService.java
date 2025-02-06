@@ -11,12 +11,11 @@ import dev.eventmanager.locations.LocationService;
 import dev.eventmanager.users.domain.AuthenticationUserService;
 import dev.eventmanager.users.domain.User;
 import dev.eventmanager.users.domain.UserRole;
-import dev.eventmanager.users.domain.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authorization.AuthorizationDeniedException;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -26,6 +25,7 @@ import java.util.Optional;
 @Service
 public class EventService {
 
+    private static final Logger log = LoggerFactory.getLogger(EventService.class);
     private final EventRepository eventRepository;
     private final LocationService locationService;
     private final MapperConfig mapperConfig;
@@ -63,6 +63,8 @@ public class EventService {
                 new ArrayList<>()
         ));
 
+        log.info("event created = {}", savedEventEntity);
+
         return mapperConfig.getMapper().map(savedEventEntity, Event.class);
     }
 
@@ -83,7 +85,7 @@ public class EventService {
      *
      * @param eventId
      */
-    public void deleteEvent(Long eventId) {
+    public void cancelEvent(Long eventId) {
         User currentUser = authenticationUserService.getAuthenticatedUser();
 
         EventEntity foundEventEntity = eventRepository.findById(eventId)
@@ -102,6 +104,8 @@ public class EventService {
 
         foundEventEntity.setStatus(EventStatus.CANCELLED.name());
         eventRepository.save(foundEventEntity);
+
+        log.info("event cancelled = {}", foundEventEntity);
     }
 
     @Transactional
@@ -125,6 +129,9 @@ public class EventService {
 
         updateEventEntityFromDto(eventEntity, eventUpdateRequestDto);
         eventRepository.save(eventEntity);
+
+        log.info("event updated = {}", eventEntity);
+
         return mapperConfig.getMapper().map(eventEntity, Event.class);
     }
 
@@ -154,10 +161,6 @@ public class EventService {
         return eventsList.stream()
                 .map(e -> mapperConfig.getMapper().map(e, Event.class))
                 .toList();
-    }
-
-    public boolean existsById(Long id) {
-        return eventRepository.existsById(id);
     }
 
     private void updateEventEntityFromDto(EventEntity eventEntity, EventUpdateRequestDto dto) {

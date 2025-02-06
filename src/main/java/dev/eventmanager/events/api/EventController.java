@@ -61,7 +61,7 @@ public class EventController {
             @PathVariable("id") Long eventId
     ) {
         log.info("Request to delete event by id: eventId={}", eventId);
-        eventService.deleteEvent(eventId);
+        eventService.cancelEvent(eventId);
 
         return ResponseEntity
                 .status(HttpStatus.NO_CONTENT)
