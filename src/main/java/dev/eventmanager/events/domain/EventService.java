@@ -83,7 +83,6 @@ public class EventService {
      * The event is not deleted from the database, but goes only into the mode of canceled
      * Can be deleted either an admin or the creator of the event.
      *
-     * @param eventId
      */
     public void cancelEvent(Long eventId) {
         User currentUser = authenticationUserService.getAuthenticatedUser();
@@ -166,7 +165,7 @@ public class EventService {
     private void updateEventEntityFromDto(EventEntity eventEntity, EventUpdateRequestDto dto) {
         Optional.ofNullable(dto.eventName()).ifPresent(eventEntity::setName);
         Optional.ofNullable(dto.maxPlaces()).ifPresent(eventEntity::setMaxPlaces);
-        Optional.ofNullable(dto.startDate()).ifPresent(eventEntity::setStartDate);
+        Optional.ofNullable(dto.startDate()).ifPresent(eventEntity::setDate);
         Optional.ofNullable(dto.cost()).ifPresent(eventEntity::setCost);
         Optional.ofNullable(dto.duration()).ifPresent(eventEntity::setDuration);
         Optional.ofNullable(dto.locationId()).ifPresent(eventEntity::setLocationId);

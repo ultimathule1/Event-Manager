@@ -33,11 +33,11 @@ public class EventEntity {
     @Column(name = "max_places")
     private int maxPlaces;
     @Column(name = "date")
-    private OffsetDateTime startDate;
+    private OffsetDateTime date;
     @Column(name = "cost", scale = 2)
     private BigDecimal cost;
     @Column(name = "duration")
-    private int duration;
+    private Integer duration;
     @Column(name = "location_id")
     private Long locationId;
     @Column(name = "status")

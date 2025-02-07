@@ -26,7 +26,7 @@ public class MapperConfig {
                                 .stream()
                                 .map(e -> new RegistrationUserEvent(e.getId(), e.getUserId(), e.getEvent().getId()))
                                 .toList(),
-                        ctx.getSource().getStartDate(),
+                        ctx.getSource().getDate(),
                         ctx.getSource().getDuration(),
                         ctx.getSource().getCost(),
                         ctx.getSource().getOwnerId(),
@@ -54,7 +54,7 @@ public class MapperConfig {
                         ctx.getSource().getId(),
                         ctx.getSource().getName(),
                         ctx.getSource().getMaxPlaces(),
-                        ctx.getSource().getStartDate(),
+                        ctx.getSource().getDate(),
                         ctx.getSource().getCost(),
                         ctx.getSource().getRegistrations().size(),
                         ctx.getSource().getDuration(),
