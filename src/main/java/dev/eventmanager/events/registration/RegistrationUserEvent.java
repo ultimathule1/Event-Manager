@@ -4,5 +4,5 @@ public record RegistrationUserEvent(
         Long id,
         Long userId,
         Long eventId
-){
+) {
 }

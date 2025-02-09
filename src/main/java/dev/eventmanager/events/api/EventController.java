@@ -1,8 +1,8 @@
 package dev.eventmanager.events.api;
 
 import dev.eventmanager.config.MapperConfig;
-import dev.eventmanager.events.domain.EventService;
 import dev.eventmanager.events.domain.Event;
+import dev.eventmanager.events.domain.EventService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

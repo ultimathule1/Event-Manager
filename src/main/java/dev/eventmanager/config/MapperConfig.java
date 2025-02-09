@@ -1,8 +1,8 @@
 package dev.eventmanager.config;
 
-import dev.eventmanager.events.domain.Event;
 import dev.eventmanager.events.api.EventDto;
 import dev.eventmanager.events.db.EventEntity;
+import dev.eventmanager.events.domain.Event;
 import dev.eventmanager.events.registration.RegistrationUserEvent;
 import dev.eventmanager.events.registration.RegistrationUserEventEntity;
 import org.modelmapper.ModelMapper;

@@ -82,7 +82,6 @@ public class EventService {
      * There is a soft removal of the event.
      * The event is not deleted from the database, but goes only into the mode of canceled
      * Can be deleted either an admin or the creator of the event.
-     *
      */
     public void cancelEvent(Long eventId) {
         User currentUser = authenticationUserService.getAuthenticatedUser();
