@@ -16,7 +16,7 @@ public record EventCreateRequestDto(
         String name,
         @NotNull
         @Positive
-        int maxPlaces,
+        Integer maxPlaces,
         @NotNull
         @Future
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
@@ -26,7 +26,7 @@ public record EventCreateRequestDto(
         BigDecimal cost,
         @NotNull
         @Min(30)
-        int duration,
+        Integer duration,
         @NotNull
         Long locationId
 ) {

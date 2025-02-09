@@ -122,7 +122,8 @@ public class EventService {
 
         validateMaxPlaces(eventEntity, eventUpdateRequestDto);
 
-        if (eventEntity.getRegistrations().size() > eventUpdateRequestDto.maxPlaces()) {
+        if ((eventUpdateRequestDto.maxPlaces() != null)
+                && (eventUpdateRequestDto.maxPlaces() < eventEntity.getRegistrations().size())) {
             throw new IllegalArgumentException("registered users more than the maximum number at the event");
         }
 

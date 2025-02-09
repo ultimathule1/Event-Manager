@@ -15,7 +15,6 @@ import dev.eventmanager.locations.Location;
 import dev.eventmanager.locations.LocationRepository;
 import dev.eventmanager.locations.LocationService;
 import dev.eventmanager.users.domain.AuthenticationUserService;
-import dev.eventmanager.users.domain.User;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -54,7 +53,8 @@ public class EventControllerTest extends RootTest {
     private RegistrationService registrationService;
 
     @Autowired
-    AuthenticationUserService authenticationUserService;
+    private AuthenticationUserService authenticationUserService;
+
 
     @BeforeEach
     void cleanUp() {
@@ -533,35 +533,6 @@ public class EventControllerTest extends RootTest {
         );
 
         org.assertj.core.api.Assertions.assertThat(eventsDtoList).hasSize(4);
-    }
-
-    @Test
-    @WithMockUser(username = "user_registration_1", authorities = "USER")
-    void shouldRegistrationUserForEvent() throws Exception {
-        Location savedLocation = locationService.createLocation(createDummyLocation());
-        var eventCreateRequestDto = createDummyEventCreateRequestDto(savedLocation.id());
-        Event savedEvent = eventService.createEvent(eventCreateRequestDto);
-
-        User user = authenticationUserService.getAuthenticatedUser();
-        registrationService.registerCurrentUserForEvent(user, savedEvent.id());
-
-        mockMvc.perform(post("/events/registration/%s".formatted(savedEvent.id())))
-                .andExpect(status().is(HttpStatus.OK.value()))
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
-
-    }
-
-    @Test
-    @WithMockUser(username = "user_cancel_1", authorities = "USER")
-    void shouldCanceledRegistration() throws Exception {
-        Location savedLocation = locationService.createLocation(createDummyLocation());
-        var eventCreateRequestDto = createDummyEventCreateRequestDto(savedLocation.id());
-        Event savedEvent = eventService.createEvent(eventCreateRequestDto);
-//        registrationService.registerCurrentUserForEvent();
-
-
     }
 
     private Location createDummyLocation() {

@@ -4,6 +4,7 @@ import dev.eventmanager.events.db.EventRepository;
 import dev.eventmanager.events.domain.EventStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -13,6 +14,7 @@ import java.util.List;
 
 @Configuration
 @EnableScheduling
+@ConditionalOnProperty(name = "scheduler.enabled", matchIfMissing = true)
 public class SchedulerConfig {
 
     private static final Logger log = LoggerFactory.getLogger(SchedulerConfig.class);

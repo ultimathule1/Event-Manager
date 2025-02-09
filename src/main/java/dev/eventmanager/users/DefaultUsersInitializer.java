@@ -1,7 +1,6 @@
 package dev.eventmanager.users;
 
 import dev.eventmanager.users.api.UserRegistration;
-import dev.eventmanager.users.db.UserEntity;
 import dev.eventmanager.users.domain.UserRole;
 import dev.eventmanager.users.domain.UserService;
 import org.springframework.context.event.ContextRefreshedEvent;
