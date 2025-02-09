@@ -11,11 +11,11 @@ public record Event(
         String name,
         List<RegistrationUserEvent> registrations,
         OffsetDateTime startDate,
-        int duration,
+        Integer duration,
         BigDecimal cost,
         Long ownerId,
         Long locationId,
         String status,
-        int maxPlaces
+        Integer maxPlaces
 ) {
 }

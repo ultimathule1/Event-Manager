@@ -4,20 +4,21 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import dev.eventmanager.RootTest;
 import dev.eventmanager.events.api.EventCreateRequestDto;
 import dev.eventmanager.events.api.EventDto;
+import dev.eventmanager.events.db.EventRepository;
+import dev.eventmanager.events.registration.RegistrationRepository;
 import dev.eventmanager.locations.Location;
+import dev.eventmanager.locations.LocationRepository;
 import dev.eventmanager.locations.LocationService;
 import dev.eventmanager.security.jwt.JwtTokenManager;
 import dev.eventmanager.users.api.UserRegistration;
 import dev.eventmanager.users.domain.User;
 import dev.eventmanager.users.domain.UserRole;
 import dev.eventmanager.users.domain.UserService;
-import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -27,8 +28,8 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 public class EventRegistrationUsersControllerTest extends RootTest {
@@ -41,6 +42,19 @@ public class EventRegistrationUsersControllerTest extends RootTest {
     JwtTokenManager jwtTokenManager;
     @Autowired
     UserService userService;
+    @Autowired
+    EventRepository eventRepository;
+    @Autowired
+    LocationRepository locationRepository;
+    @Autowired
+    RegistrationRepository registrationRepository;
+
+    @BeforeEach
+    void cleanUp() {
+        registrationRepository.deleteAll();
+        eventRepository.deleteAll();
+        locationRepository.deleteAll();
+    }
 
     @Test
     void shouldRegistrationUserForEvent() throws Exception {
