@@ -10,11 +10,9 @@ import dev.eventmanager.events.db.EventRepository;
 import dev.eventmanager.events.domain.Event;
 import dev.eventmanager.events.domain.EventService;
 import dev.eventmanager.events.domain.EventStatus;
-import dev.eventmanager.events.registration.RegistrationService;
 import dev.eventmanager.locations.Location;
 import dev.eventmanager.locations.LocationRepository;
 import dev.eventmanager.locations.LocationService;
-import dev.eventmanager.users.domain.AuthenticationUserService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -48,13 +46,6 @@ public class EventControllerTest extends RootTest {
 
     @Autowired
     private LocationRepository locationRepository;
-
-    @Autowired
-    private RegistrationService registrationService;
-
-    @Autowired
-    private AuthenticationUserService authenticationUserService;
-
 
     @BeforeEach
     void cleanUp() {
