@@ -18,7 +18,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -51,7 +50,6 @@ public class EventService {
         }
 
         EventEntity savedEventEntity = eventRepository.save(new EventEntity(
-                null,
                 eventCreateRequestDto.name(),
                 eventCreateRequestDto.maxPlaces(),
                 eventCreateRequestDto.date(),
@@ -59,8 +57,7 @@ public class EventService {
                 eventCreateRequestDto.duration(),
                 eventCreateRequestDto.locationId(),
                 EventStatus.WAIT_START.name(),
-                user.id(),
-                new ArrayList<>()
+                user.id()
         ));
 
         log.info("event created = {}", savedEventEntity);
@@ -94,7 +91,7 @@ public class EventService {
         }
 
         if (foundEventEntity.getStatus().equals(EventStatus.CANCELLED.name())) {
-            throw new IllegalArgumentException("Event with id=%s is already cancelled");
+            throw new IllegalArgumentException("Event with id=%s is already cancelled".formatted(eventId));
         }
         if (!foundEventEntity.getStatus().equals(EventStatus.WAIT_START.name())) {
             throw new IllegalArgumentException("Event with id=%s already cannot be cancelled");
@@ -183,12 +180,11 @@ public class EventService {
         Long locationId = dto.locationId() == null ? eventEntity.getLocationId() : dto.locationId();
         if (locationId == null) return;
 
-        try {
-            Location location = locationService.getLocationById(dto.locationId());
+        if (locationService.existsLocationById(locationId)) {
+            Location location = locationService.getLocationById(locationId);
             if (location.capacity() != null && location.capacity() < dto.maxPlaces()) {
                 throw new IllegalArgumentException("The maximum number of event is more than location capacity");
             }
-        } catch (EntityNotFoundException ignored) {
         }
     }
 }

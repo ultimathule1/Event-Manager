@@ -15,6 +15,7 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -46,4 +47,16 @@ public class EventEntity {
     private Long ownerId;
     @OneToMany(mappedBy = "event")
     private List<RegistrationUserEventEntity> registrations;
+
+    public EventEntity(String name, Integer maxPlaces, OffsetDateTime date, BigDecimal cost, Integer duration, Long locationId, String status, Long ownerId) {
+        this.name = name;
+        this.maxPlaces = maxPlaces;
+        this.date = date;
+        this.cost = cost;
+        this.duration = duration;
+        this.locationId = locationId;
+        this.status = status;
+        this.ownerId = ownerId;
+        registrations = new ArrayList<>();
+    }
 }

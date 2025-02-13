@@ -10,7 +10,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -42,46 +41,46 @@ public class SecurityConfiguration {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorizeRequests ->
-                                authorizeRequests
-                                        .requestMatchers(HttpMethod.POST, "/users")
-                                        .permitAll()
-                                        .requestMatchers(HttpMethod.GET, "/users/{id}")
-                                        .hasAnyAuthority("ADMIN")
-                                        .requestMatchers(HttpMethod.POST, "/users/auth")
-                                        .permitAll()
+                        authorizeRequests
+                                .requestMatchers(HttpMethod.POST, "/users")
+                                .permitAll()
+                                .requestMatchers(HttpMethod.GET, "/users/{id}")
+                                .hasAnyAuthority("ADMIN")
+                                .requestMatchers(HttpMethod.POST, "/users/auth")
+                                .permitAll()
 
-                                        .requestMatchers(HttpMethod.GET, "/locations/{id}")
-                                        .hasAnyAuthority("ADMIN", "USER")
-                                        .requestMatchers(HttpMethod.GET, "/locations")
-                                        .hasAnyAuthority("ADMIN", "USER")
-                                        .requestMatchers(HttpMethod.POST, "/locations")
-                                        .hasAnyAuthority("ADMIN")
-                                        .requestMatchers(HttpMethod.PUT, "/locations")
-                                        .hasAnyAuthority("ADMIN")
-                                        .requestMatchers(HttpMethod.DELETE, "/locations/**")
-                                        .hasAnyAuthority("ADMIN")
+                                .requestMatchers(HttpMethod.GET, "/locations/{id}")
+                                .hasAnyAuthority("ADMIN", "USER")
+                                .requestMatchers(HttpMethod.GET, "/locations")
+                                .hasAnyAuthority("ADMIN", "USER")
+                                .requestMatchers(HttpMethod.POST, "/locations")
+                                .hasAnyAuthority("ADMIN")
+                                .requestMatchers(HttpMethod.PUT, "/locations")
+                                .hasAnyAuthority("ADMIN")
+                                .requestMatchers(HttpMethod.DELETE, "/locations/**")
+                                .hasAnyAuthority("ADMIN")
 
-                                        .requestMatchers(HttpMethod.POST, "/events/search")
-                                        .hasAnyAuthority("ADMIN","USER")
-                                        .requestMatchers(HttpMethod.POST, "/events")
-                                        .hasAnyAuthority("USER")
-                                        .requestMatchers(HttpMethod.GET, "/events/my")
-                                        .hasAnyAuthority("USER")
-                                        .requestMatchers(HttpMethod.GET, "/events/{id}")
-                                        .hasAnyAuthority("ADMIN", "USER")
-                                        .requestMatchers(HttpMethod.DELETE, "/events/{id}")
-                                        .hasAnyAuthority("ADMIN", "USER")
-                                        .requestMatchers(HttpMethod.PUT, "/events/{id}")
-                                        .hasAnyAuthority("ADMIN", "USER")
+                                .requestMatchers(HttpMethod.POST, "/events/search")
+                                .hasAnyAuthority("ADMIN", "USER")
+                                .requestMatchers(HttpMethod.POST, "/events")
+                                .hasAnyAuthority("USER")
+                                .requestMatchers(HttpMethod.GET, "/events/my")
+                                .hasAnyAuthority("USER")
+                                .requestMatchers(HttpMethod.GET, "/events/{id}")
+                                .hasAnyAuthority("ADMIN", "USER")
+                                .requestMatchers(HttpMethod.DELETE, "/events/{id}")
+                                .hasAnyAuthority("ADMIN", "USER")
+                                .requestMatchers(HttpMethod.PUT, "/events/{id}")
+                                .hasAnyAuthority("ADMIN", "USER")
 
-                                        .requestMatchers(HttpMethod.GET, "/events/registrations/my")
-                                        .hasAnyAuthority("USER")
-                                        .requestMatchers(HttpMethod.DELETE,"/events/registrations/cancel/{id}")
-                                        .hasAnyAuthority("USER")
-                                        .requestMatchers(HttpMethod.POST,"/events/registrations/{id}")
-                                        .hasAnyAuthority("USER")
+                                .requestMatchers(HttpMethod.GET, "/events/registrations/my")
+                                .hasAnyAuthority("USER")
+                                .requestMatchers(HttpMethod.DELETE, "/events/registrations/cancel/{id}")
+                                .hasAnyAuthority("USER")
+                                .requestMatchers(HttpMethod.POST, "/events/registrations/{id}")
+                                .hasAnyAuthority("USER")
 
-                                        .anyRequest().authenticated()
+                                .anyRequest().authenticated()
                 )
                 .exceptionHandling(exception -> {
                     exception

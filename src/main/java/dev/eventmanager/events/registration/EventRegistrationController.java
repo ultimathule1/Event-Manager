@@ -1,6 +1,8 @@
 package dev.eventmanager.events.registration;
 
+import dev.eventmanager.config.MapperConfig;
 import dev.eventmanager.events.api.EventDto;
+import dev.eventmanager.events.domain.Event;
 import dev.eventmanager.users.domain.AuthenticationUserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,10 +24,12 @@ public class EventRegistrationController {
     private static final Logger log = LoggerFactory.getLogger(EventRegistrationController.class);
     private final RegistrationService registrationService;
     private final AuthenticationUserService authenticationUserService;
+    private final MapperConfig mapperConfig;
 
-    public EventRegistrationController(RegistrationService registrationService, AuthenticationUserService authenticationUserService) {
+    public EventRegistrationController(RegistrationService registrationService, AuthenticationUserService authenticationUserService, MapperConfig mapperConfig) {
         this.registrationService = registrationService;
         this.authenticationUserService = authenticationUserService;
+        this.mapperConfig = mapperConfig;
     }
 
     @PostMapping("/{eventId}")
@@ -50,10 +54,14 @@ public class EventRegistrationController {
     @GetMapping("/my")
     public ResponseEntity<List<EventDto>> getMyRegistrationEvents() {
         log.info("Received request to get all events where the user is registered");
-        List<EventDto> events = registrationService.getAllEventWhereUserRegistered(authenticationUserService.getAuthenticatedUser());
+        List<Event> events = registrationService.getAllEventWhereUserRegistered(authenticationUserService.getAuthenticatedUser().id());
 
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(events);
+                .body(events
+                        .stream()
+                        .map(e -> mapperConfig.getMapper().map(e, EventDto.class))
+                        .toList()
+                );
     }
 }

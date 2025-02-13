@@ -80,13 +80,13 @@ public class RegistrationService {
         registrationRepository.deleteById(registrationEntity.getId());
     }
 
-    public List<EventDto> getAllEventWhereUserRegistered(User user) {
+    public List<Event> getAllEventWhereUserRegistered(Long userId) {
         List<EventEntity> eventsEntity =
-                registrationRepository.findAllEventsWhereUserRegistered(user.id());
+                registrationRepository.findAllEventsWhereUserRegistered(userId);
 
         return eventsEntity
                 .stream()
-                .map(e -> mapperConfig.getMapper().map(e, EventDto.class))
+                .map(e -> mapperConfig.getMapper().map(e, Event.class))
                 .toList();
     }
 }

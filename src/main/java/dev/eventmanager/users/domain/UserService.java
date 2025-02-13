@@ -68,7 +68,8 @@ public class UserService {
                 userRole.name()
         ));
 
-        log.info("Created new user: {}", savedUserEntity);
+        log.info("Created new user: id={}, login={}, age={}, userRole={}",
+                savedUserEntity.getId(), savedUserEntity.getLogin(), savedUserEntity.getAge(), userRole.name());
 
         return userEntityMapper.toDomain(savedUserEntity);
     }
