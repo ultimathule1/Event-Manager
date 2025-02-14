@@ -2,6 +2,7 @@ package dev.eventmanager.locations;
 
 import dev.eventmanager.RootTest;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,7 +15,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-public class LocationControllerTest extends RootTest {
+public class LocationEventControllerTest extends RootTest {
 
     @Autowired
     LocationRepository locationRepository;
@@ -22,6 +23,11 @@ public class LocationControllerTest extends RootTest {
     LocationService locationService;
     @Autowired
     LocationDtoMapper locationDtoMapper;
+
+    @BeforeEach
+    void cleanUp() {
+        locationRepository.deleteAll();
+    }
 
     @Test
     @WithMockUser(username = "admin", authorities = "ADMIN")

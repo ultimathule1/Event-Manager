@@ -99,8 +99,8 @@ public class GlobalExceptionHandler {
                 .body(errorMessage);
     }
 
-    @ExceptionHandler(AuthenticationException.class)
-    public ResponseEntity<ErrorMessage> handleAuthenticationException(AuthenticationException ex) {
+    @ExceptionHandler(value = {AuthenticationException.class, SecurityException.class})
+    public ResponseEntity<ErrorMessage> handleAuthenticationException(Exception ex) {
         log.error("Handle Authentication Exception ", ex);
         ErrorMessage errorMessage = new ErrorMessage(
                 "Authentication error",

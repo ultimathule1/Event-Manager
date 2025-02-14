@@ -4,12 +4,15 @@ import dev.eventmanager.users.api.UserRegistration;
 import dev.eventmanager.users.db.UserEntity;
 import dev.eventmanager.users.db.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 public class UserService {
 
+    private final Logger log = LoggerFactory.getLogger(UserService.class);
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserEntityMapper userEntityMapper;
@@ -64,6 +67,9 @@ public class UserService {
                 userPassword,
                 userRole.name()
         ));
+
+        log.info("Created new user: id={}, login={}, age={}, userRole={}",
+                savedUserEntity.getId(), savedUserEntity.getLogin(), savedUserEntity.getAge(), userRole.name());
 
         return userEntityMapper.toDomain(savedUserEntity);
     }

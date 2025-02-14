@@ -1,6 +1,8 @@
 package dev.eventmanager.locations;
 
 import jakarta.persistence.EntityNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -8,6 +10,7 @@ import java.util.List;
 @Service
 public class LocationService {
 
+    private final Logger log = LoggerFactory.getLogger(LocationService.class);
     private final LocationRepository locationRepository;
     private final LocationEntityMapper locationEntityMapper;
 
@@ -26,16 +29,18 @@ public class LocationService {
     public Location createLocation(Location location) {
         checkIsLocationIdNull(location.id());
         var locationEntity = locationEntityMapper.toEntity(location);
+        log.info("created location: {}", locationEntity);
         return locationEntityMapper.toDomain(locationRepository.save(locationEntity));
     }
 
     public void deleteLocation(Long locationId) {
-        checkLocationExists(locationId);
+        checkLocationExistsById(locationId);
         locationRepository.deleteById(locationId);
+        log.info("location with id={} deleted", locationId);
     }
 
     public Location getLocationById(Long locationId) {
-        checkLocationExists(locationId);
+        checkLocationExistsById(locationId);
 
         return locationEntityMapper.toDomain(locationRepository.getLocationEntityById(locationId));
     }
@@ -48,18 +53,26 @@ public class LocationService {
                     "The capacity of the location cannot be changed downwards");
         }
 
-        return locationEntityMapper.toDomain(locationRepository.save(new LocationEntity(
+        LocationEntity locationEntity = locationRepository.save(new LocationEntity(
                 locationId,
                 updatedLocation.name(),
                 updatedLocation.address(),
                 updatedLocation.capacity(),
                 updatedLocation.description()
-        )));
+        ));
+
+        log.info("location with id={} updated", locationId);
+
+        return locationEntityMapper.toDomain(locationEntity);
     }
 
-    private void checkLocationExists(Long locationId) {
+    public boolean existsLocationById(Long locationId) {
+        return locationRepository.existsById(locationId);
+    }
+
+    private void checkLocationExistsById(Long locationId) {
         if (!locationRepository.existsById(locationId)) {
-            throw new EntityNotFoundException("Location not found");
+            throw new EntityNotFoundException("Location with id=%s not found".formatted(locationId));
         }
     }
 

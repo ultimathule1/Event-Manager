@@ -38,7 +38,7 @@ public class UserTestUtils {
 
     private void initializeTestUsers() {
         createUser(DEFAULT_ADMIN_LOGIN, 20, "admin_admin", UserRole.ADMIN);
-        createUser(DEFAULT_USER_LOGIN, 20, "user_user", UserRole.USER);
+        createUser(DEFAULT_USER_LOGIN, 21, "user_user", UserRole.USER);
     }
 
     private void createUser(

@@ -1,7 +1,6 @@
 package dev.eventmanager.users;
 
 import dev.eventmanager.users.api.UserRegistration;
-import dev.eventmanager.users.db.UserEntity;
 import dev.eventmanager.users.domain.UserRole;
 import dev.eventmanager.users.domain.UserService;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -18,22 +17,18 @@ public class DefaultUsersInitializer {
     private static final String DEFAULT_ADMIN_PASSWORD = "admin";
 
     private final UserService userService;
-    private final PasswordEncoder passwordEncoder;
 
-    public DefaultUsersInitializer(UserService userService, PasswordEncoder passwordEncoder) {
+    public DefaultUsersInitializer(UserService userService) {
         this.userService = userService;
-        this.passwordEncoder = passwordEncoder;
     }
 
     @EventListener(ContextRefreshedEvent.class)
     public void onContextStartedCreateDefaultUsers(ContextRefreshedEvent event) {
-        var userPassword = passwordEncoder.encode(DEFAULT_USER_PASSWORD);
-        var adminPassword = passwordEncoder.encode(DEFAULT_ADMIN_PASSWORD);
 
         if (!userService.existsByLogin(DEFAULT_USER_LOGIN)) {
             createUser(
                     DEFAULT_USER_LOGIN,
-                    userPassword,
+                    DEFAULT_USER_PASSWORD,
                     20,
                     UserRole.USER
             );
@@ -42,7 +37,7 @@ public class DefaultUsersInitializer {
         if(!userService.existsByLogin(DEFAULT_ADMIN_LOGIN)) {
             createUser(
                     DEFAULT_ADMIN_LOGIN,
-                    adminPassword,
+                    DEFAULT_ADMIN_PASSWORD,
                     30,
                     UserRole.ADMIN
             );

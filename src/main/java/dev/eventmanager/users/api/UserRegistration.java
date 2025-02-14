@@ -7,10 +7,10 @@ import jakarta.validation.constraints.Size;
 
 public record UserRegistration(
         @NotBlank(message = "login must not be empty")
-        @Size(min = 5, message = "login size must be at least 5 characters")
+        @Size(min = 4, message = "login size must be at least 4 characters")
         String login,
         @NotBlank(message = "password must not be empty")
-        @Size(min = 5, message = "login size must be at least 8 characters")
+        @Size(min = 4, message = "login size must be at least 4 characters")
         String password,
         @Min(value = 18, message = "must be at least 18 years of age")
         int age
