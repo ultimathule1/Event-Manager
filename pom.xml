@@ -29,6 +29,7 @@
     <properties>
         <java.version>23</java.version>
         <spring-cloud.version>2024.0.0</spring-cloud.version>
+        <spring.kafka.version>3.3.2</spring.kafka.version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -135,7 +136,11 @@
             <artifactId>vault</artifactId>
             <scope>test</scope>
         </dependency>
-
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka</artifactId>
+            <version>${spring.kafka.version}</version>
+        </dependency>
 
     </dependencies>
 

@@ -4,6 +4,8 @@ import dev.eventmanager.config.MapperConfig;
 import dev.eventmanager.events.api.EventCreateRequestDto;
 import dev.eventmanager.events.api.EventSearchRequestDto;
 import dev.eventmanager.events.api.EventUpdateRequestDto;
+import dev.eventmanager.events.api.kafka.ChangedEventFields;
+import dev.eventmanager.events.api.kafka.event.EventChangerEvent;
 import dev.eventmanager.events.db.EventEntity;
 import dev.eventmanager.events.db.EventRepository;
 import dev.eventmanager.locations.Location;
@@ -15,10 +17,20 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.KafkaHeaders;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -29,17 +41,23 @@ public class EventService {
     private final LocationService locationService;
     private final MapperConfig mapperConfig;
     private final AuthenticationUserService authenticationUserService;
+    private final KafkaTemplate<Long, EventChangerEvent> kafkaTemplate;
+    private final String eventsTopicName;
 
     public EventService(
             EventRepository eventRepository,
             LocationService locationService,
             MapperConfig mapperConfig,
-            AuthenticationUserService authenticationUserService) {
+            AuthenticationUserService authenticationUserService,
+            KafkaTemplate<Long, EventChangerEvent> kafkaTemplate,
+            @Value("${events.notifications.topic.name}") String eventsTopicName) {
 
         this.eventRepository = eventRepository;
         this.locationService = locationService;
         this.mapperConfig = mapperConfig;
         this.authenticationUserService = authenticationUserService;
+        this.kafkaTemplate = kafkaTemplate;
+        this.eventsTopicName = eventsTopicName;
     }
 
     public Event createEvent(EventCreateRequestDto eventCreateRequestDto) {
@@ -60,16 +78,52 @@ public class EventService {
                 user.id()
         ));
 
-        log.info("event created = {}", savedEventEntity);
+        Event savedEvent = mapperConfig.getMapper().map(savedEventEntity, Event.class);
 
-        return mapperConfig.getMapper().map(savedEventEntity, Event.class);
+        EventChangerEvent event = new EventChangerEvent();
+        event.setChangedEventByUserId(user.id());
+        event.setEventId(savedEvent.id());
+        event.setOwnerEventId(savedEvent.ownerId());
+        event.setEventSubscribers(new ArrayList<>());
+
+        ChangedEventFields changedEventFields = new ChangedEventFields();
+        HashMap<String, String> mapEventName = new HashMap<>();
+        mapEventName.put(savedEvent.name(), null);
+        changedEventFields.setEventName(mapEventName);
+
+        HashMap<Integer, Integer> mapMaxPlaces = new HashMap<>();
+        mapMaxPlaces.put(savedEvent.maxPlaces(), null);
+        changedEventFields.setMaxPlaces(mapMaxPlaces);
+
+        HashMap<Integer, Integer> mapDuration = new HashMap<>();
+        mapDuration.put(savedEvent.duration(), null);
+        changedEventFields.setDuration(mapDuration);
+
+        HashMap<Long, Long> mapLocationId = new HashMap<>();
+        mapLocationId.put(savedEvent.locationId(), null);
+        changedEventFields.setLocationId(mapLocationId);
+
+        HashMap<OffsetDateTime, OffsetDateTime> mapDateTime = new HashMap<>();
+        mapDateTime.put(savedEvent.startDate(), null);
+        changedEventFields.setStartTime(mapDateTime);
+
+        HashMap<BigDecimal, BigDecimal> mapCost = new HashMap<>();
+        mapCost.put(savedEvent.cost(), null);
+        changedEventFields.setCost(mapCost);
+
+        event.setChangedEventFields(changedEventFields);
+
+        kafkaTemplate.send(eventsTopicName, event);
+
+        log.info("event created = {}", savedEvent);
+
+        return savedEvent;
     }
 
     @Transactional
     public Event getEventById(Long id) {
         EventEntity event = eventRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Event with id=%s not found".formatted(id)));
-        System.out.println(event.getRegistrations());
         return mapperConfig
                 .getMapper()
                 .map(event, Event.class);
