@@ -1,20 +1,22 @@
 package dev.eventmanager.events.api.kafka.event;
 
-import dev.eventmanager.events.api.kafka.ChangedEventFields;
-import dev.eventmanager.users.domain.User;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class EventChangerEvent {
     @NotNull
     @Positive
@@ -23,8 +25,24 @@ public class EventChangerEvent {
     @NotNull
     @Positive
     private Long ownerEventId;
-    @NotNull
-    private ChangedEventFields changedEventFields;
-    @NotNull
-    private List<User> eventSubscribers;
+//    @NotNull
+//    private List<> changedEventFields;
+    private List<Long> eventSubscribers;
+
+    private FieldChange<String> fieldEventName;
+    private FieldChange<BigDecimal> fieldEventCost;
+    private FieldChange<OffsetDateTime> fieldEventDate;
+    private FieldChange<Integer> fieldMaxPlaces;
+    private FieldChange<Integer> fieldDuration;
+    private FieldChange<Long> fieldLocationId;
+    private FieldChange<String> fieldStatus;
+
+//    @Getter
+//    @Setter
+//    @AllArgsConstructor
+//    @Builder
+//    public static class FieldChange<T> {
+//        T oldValue;
+//        T newValue;
+//    }
 }

@@ -1,5 +1,6 @@
 package dev.eventmanager.events.api.kafka;
 
+import dev.eventmanager.events.domain.Event;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,7 +17,7 @@ import java.util.HashMap;
 @Builder
 public class ChangedEventFields {
     /**
-     * First is new value, Second is old value
+     * First is old value, Second is new value
      * Values can be null!!!
      */
     private HashMap<String, String> eventName;
@@ -25,4 +26,22 @@ public class ChangedEventFields {
     private HashMap<BigDecimal, BigDecimal> cost;
     private HashMap<Integer, Integer> duration;
     private HashMap<Long, Long> locationId;
+    private HashMap<String, String> status;
+
+    public ChangedEventFields(Event event) {
+        eventName = new HashMap<>();
+        eventName.put(event.name(), null);
+        maxPlaces = new HashMap<>();
+        maxPlaces.put(event.maxPlaces(), null);
+        startTime = new HashMap<>();
+        startTime.put(event.startDate(), null);
+        cost = new HashMap<>();
+        cost.put(event.cost(), null);
+        duration = new HashMap<>();
+        duration.put(event.duration(), null);
+        locationId = new HashMap<>();
+        locationId.put(event.locationId(), null);
+        status = new HashMap<>();
+        status.put(event.status(), null);
+    }
 }
