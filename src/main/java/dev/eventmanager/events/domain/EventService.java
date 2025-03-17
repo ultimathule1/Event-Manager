@@ -25,8 +25,10 @@ import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 @Service
 public class EventService {
@@ -237,29 +239,21 @@ public class EventService {
     private EventChangerEvent createMessageForKafka(Event eventBefore, Event eventAfter) {
         EventChangerEvent changerEvent = createMessageForKafka(eventBefore);
 
-        if (!(eventBefore.startDate().equals(eventAfter.startDate()))) {
-            changerEvent.setFieldEventDate(new FieldChange<>(eventBefore.startDate(),eventAfter.startDate()));
-        }
-        if (!(eventBefore.duration().equals(eventAfter.duration()))) {
-            changerEvent.setFieldDuration(new FieldChange<>(eventBefore.duration(), eventAfter.duration()));
-        }
-        if (!(eventBefore.locationId().equals(eventAfter.locationId()))) {
-            changerEvent.setFieldLocationId(new FieldChange<>(eventBefore.locationId(), eventAfter.locationId()));
-        }
-        if (!(eventBefore.name().equals(eventAfter.name()))) {
-            changerEvent.setFieldEventName(new FieldChange<>(eventBefore.name(), eventAfter.name()));
-        }
-        if (!(eventBefore.cost().equals(eventAfter.cost()))) {
-            changerEvent.setFieldEventCost(new FieldChange<>(eventBefore.cost(), eventAfter.cost()));
-        }
-        if (!(eventBefore.maxPlaces().equals(eventAfter.maxPlaces()))) {
-            changerEvent.setFieldMaxPlaces(new FieldChange<>(eventBefore.maxPlaces(), eventAfter.maxPlaces()));
-        }
-        if (!(eventBefore.status().equals(eventAfter.status()))) {
-            changerEvent.setFieldStatus(new FieldChange<>(eventBefore.status(), eventAfter.status()));
-        }
+        updateField(eventBefore.startDate(), eventAfter.startDate(), changerEvent::setFieldEventDate);
+        updateField(eventBefore.duration(), eventAfter.duration(), changerEvent::setFieldDuration);
+        updateField(eventBefore.locationId(), eventAfter.locationId(), changerEvent::setFieldLocationId);
+        updateField(eventBefore.name(), eventAfter.name(), changerEvent::setFieldEventName);
+        updateField(eventBefore.cost(), eventAfter.cost(), changerEvent::setFieldEventCost);
+        updateField(eventBefore.maxPlaces(), eventAfter.maxPlaces(), changerEvent::setFieldMaxPlaces);
+        updateField(eventBefore.status(), eventAfter.status(), changerEvent::setFieldStatus);
 
         return changerEvent;
+    }
+
+    private <T> void updateField(T before, T after, Consumer<FieldChange<T>> setter) {
+        if (!Objects.equals(before, after)) {
+            setter.accept(new FieldChange<>(before, after));
+        }
     }
 
     private void sendKafkaMessage(String eventsTopicName, EventChangerEvent changerEvent) {

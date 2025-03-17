@@ -109,7 +109,7 @@ public class GlobalExceptionHandler {
         );
 
         return ResponseEntity
-                .status(HttpStatus.UNAUTHORIZED)
+            .status(HttpStatus.UNAUTHORIZED)
                 .body(errorMessage);
     }
 }

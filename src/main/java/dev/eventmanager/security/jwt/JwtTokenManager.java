@@ -4,8 +4,6 @@ import dev.eventmanager.users.db.UserRepository;
 import dev.eventmanager.users.domain.UserRole;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -16,7 +14,6 @@ import java.util.NoSuchElementException;
 @Component
 public class JwtTokenManager {
 
-    private static final Logger log = LogManager.getLogger(JwtTokenManager.class);
     private final SecretKey key;
     private final long expirationTime;
     private final UserRepository userRepository;

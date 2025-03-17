@@ -73,5 +73,4 @@ public interface EventRepository extends JpaRepository<EventEntity, Long> {
     List<Long> findEndedEventWithStatus(
             @Param("status") String status
     );
-
 }
