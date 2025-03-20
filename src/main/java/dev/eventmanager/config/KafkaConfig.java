@@ -36,11 +36,11 @@ public class KafkaConfig {
     public NewTopic createEventTopic() {
         return TopicBuilder
                 .name(env.getProperty("events.notifications.topic.name", "events-notifications"))
-                .partitions(Integer.parseInt(env.getProperty("events.notifications.topic.partitions", "3")))
-                .replicas(Integer.parseInt(env.getProperty("events.notifications.topic.replicas", "3")))
+                .partitions(Integer.parseInt(env.getProperty("events.notifications.topic.partitions", "1")))
+                .replicas(Integer.parseInt(env.getProperty("events.notifications.topic.replicas", "1")))
                 .configs(
                         Map.of("min.insync.replicas",
-                                env.getProperty("events.notifications.topic.min.insync.replicas", "2")))
+                                env.getProperty("events.notifications.topic.min.insync.replicas", "1")))
                 .build();
     }
 }

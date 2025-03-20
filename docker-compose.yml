@@ -20,6 +20,16 @@ services:
     ports:
       - "9092:9092"
 
+  #postgres db for idempotency
+#  postgres:
+#    image: postgres:14
+#    environment:
+#      POSTGRES_USER: postgres
+#      POSTGRES_PASSWORD: postgres_postgres
+#      POSTGRES_DB: idempotency_db
+#    ports:
+#      - "5434:5432"
+
 #  kafka-event-1:
 #    image: confluentinc/cp-kafka:7.5.0
 #    depends_on:

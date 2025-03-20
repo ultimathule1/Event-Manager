@@ -16,6 +16,8 @@ import dev.eventmanager.users.domain.User;
 import dev.eventmanager.users.domain.UserRole;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import org.apache.kafka.clients.producer.Producer;
+import org.apache.kafka.clients.producer.ProducerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,6 +29,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
@@ -257,7 +260,15 @@ public class EventService {
     }
 
     private void sendKafkaMessage(String eventsTopicName, EventChangerEvent changerEvent) {
-        CompletableFuture<SendResult<Long, EventChangerEvent>> future = kafkaTemplate.send(eventsTopicName, changerEvent);
+        ProducerRecord<Long, EventChangerEvent> record = new ProducerRecord<>(
+                eventsTopicName,
+                changerEvent.getEventId() + changerEvent.getOwnerEventId(),
+                changerEvent
+        );
+
+        record.headers().add("messageId", UUID.randomUUID().toString().getBytes());
+
+        CompletableFuture<SendResult<Long, EventChangerEvent>> future = kafkaTemplate.send(record);
         future.whenComplete((result, exception) -> {
             if (exception != null) {
                 log.error("Failed to send message: {}", exception.getMessage());

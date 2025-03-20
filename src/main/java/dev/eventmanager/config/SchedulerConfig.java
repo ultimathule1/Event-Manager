@@ -1,5 +1,6 @@
 package dev.eventmanager.config;
 
+import dev.eventmanager.events.db.EventEntity;
 import dev.eventmanager.events.db.EventRepository;
 import dev.eventmanager.events.domain.EventStatus;
 import org.slf4j.Logger;
@@ -28,6 +29,8 @@ public class SchedulerConfig {
     public void schedulerForCheckEventStatus() {
         log.info("the scheduler for changing the event status started");
         Instant before = Instant.now();
+
+        //TODO:Здесь также нужно реализовать логику при изменении статуса мероприятия отправлять в кафку
 
         List<Long> startedEventsList = eventRepository.findStartedEventWithStatus(EventStatus.WAIT_START.name());
         startedEventsList
