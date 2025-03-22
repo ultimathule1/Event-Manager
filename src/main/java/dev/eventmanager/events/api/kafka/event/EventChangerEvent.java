@@ -16,6 +16,7 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+//TODO:Написать самому Builder
 @Builder
 public class EventChangerEvent {
     @NotNull
@@ -25,8 +26,6 @@ public class EventChangerEvent {
     @NotNull
     @Positive
     private Long ownerEventId;
-//    @NotNull
-//    private List<> changedEventFields;
     private List<Long> eventSubscribers;
 
     private FieldChange<String> fieldEventName;
@@ -36,13 +35,4 @@ public class EventChangerEvent {
     private FieldChange<Integer> fieldDuration;
     private FieldChange<Long> fieldLocationId;
     private FieldChange<String> fieldStatus;
-
-//    @Getter
-//    @Setter
-//    @AllArgsConstructor
-//    @Builder
-//    public static class FieldChange<T> {
-//        T oldValue;
-//        T newValue;
-//    }
 }

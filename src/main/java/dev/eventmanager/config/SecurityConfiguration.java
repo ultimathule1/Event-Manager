@@ -1,5 +1,6 @@
-package dev.eventmanager.security;
+package dev.eventmanager.config;
 
+import dev.eventmanager.security.CustomUserDetails;
 import dev.eventmanager.security.exceptions.handlers.CustomAccessDeniedHandler;
 import dev.eventmanager.security.exceptions.handlers.CustomAuthenticationEntryPoint;
 import dev.eventmanager.security.jwt.JwtTokenFilter;

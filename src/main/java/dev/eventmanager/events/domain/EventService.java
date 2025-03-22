@@ -8,7 +8,7 @@ import dev.eventmanager.events.api.kafka.event.EventChangerEvent;
 import dev.eventmanager.events.api.kafka.event.FieldChange;
 import dev.eventmanager.events.db.EventEntity;
 import dev.eventmanager.events.db.EventRepository;
-import dev.eventmanager.events.registration.RegistrationRepository;
+import dev.eventmanager.kafka.service.KafkaEventMessageService;
 import dev.eventmanager.locations.Location;
 import dev.eventmanager.locations.LocationService;
 import dev.eventmanager.users.domain.AuthenticationUserService;
@@ -16,22 +16,14 @@ import dev.eventmanager.users.domain.User;
 import dev.eventmanager.users.domain.UserRole;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
-import org.apache.kafka.clients.producer.Producer;
-import org.apache.kafka.clients.producer.ProducerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.support.SendResult;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
 
 @Service
 public class EventService {
@@ -41,26 +33,23 @@ public class EventService {
     private final LocationService locationService;
     private final MapperConfig mapperConfig;
     private final AuthenticationUserService authenticationUserService;
-    private final KafkaTemplate<Long, EventChangerEvent> kafkaTemplate;
     private final String eventsTopicName;
-    private final RegistrationRepository registrationRepository;
+    private final KafkaEventMessageService kafkaEventMessageService;
 
     public EventService(
             EventRepository eventRepository,
             LocationService locationService,
             MapperConfig mapperConfig,
             AuthenticationUserService authenticationUserService,
-            KafkaTemplate<Long, EventChangerEvent> kafkaTemplate,
             @Value("${events.notifications.topic.name}") String eventsTopicName,
-            RegistrationRepository registrationRepository) {
+            KafkaEventMessageService kafkaEventMessageService) {
 
         this.eventRepository = eventRepository;
         this.locationService = locationService;
         this.mapperConfig = mapperConfig;
         this.authenticationUserService = authenticationUserService;
-        this.kafkaTemplate = kafkaTemplate;
         this.eventsTopicName = eventsTopicName;
-        this.registrationRepository = registrationRepository;
+        this.kafkaEventMessageService = kafkaEventMessageService;
     }
 
     public Event createEvent(EventCreateRequestDto eventCreateRequestDto) {
@@ -119,16 +108,12 @@ public class EventService {
             throw new IllegalArgumentException("Event with id=%s already cannot be cancelled");
         }
 
-        String statusBefore = foundEventEntity.getStatus();
+        Event eventBefore = mapperConfig.getMapper().map(foundEventEntity, Event.class);
         foundEventEntity.setStatus(EventStatus.CANCELLED.name());
         eventRepository.save(foundEventEntity);
+        Event eventAfter = mapperConfig.getMapper().map(foundEventEntity, Event.class);
 
-        Event cancelledEvent = mapperConfig.getMapper().map(foundEventEntity, Event.class);
-
-        EventChangerEvent changerEvent = createMessageForKafka(cancelledEvent);
-        changerEvent.setFieldStatus(new FieldChange<>(statusBefore,cancelledEvent.status()));
-
-        sendKafkaMessage(eventsTopicName, changerEvent);
+        kafkaEventMessageService.sendKafkaEventMessage(eventsTopicName, eventBefore, eventAfter, true);
 
         log.info("event cancelled = {}", foundEventEntity);
     }
@@ -158,8 +143,7 @@ public class EventService {
         eventRepository.save(eventEntity);
         Event updatedEvent = mapperConfig.getMapper().map(eventEntity, Event.class);
 
-        EventChangerEvent eventChangerEvent = createMessageForKafka(beforeUpdateEvent,updatedEvent);
-        sendKafkaMessage(eventsTopicName, eventChangerEvent);
+        kafkaEventMessageService.sendKafkaEventMessage(eventsTopicName,beforeUpdateEvent,updatedEvent, true);
 
         log.info("event updated = {}", updatedEvent);
 
@@ -221,60 +205,5 @@ public class EventService {
                 throw new IllegalArgumentException("The maximum number of event is more than location capacity");
             }
         }
-    }
-
-    private EventChangerEvent createMessageForKafka(Event event) {
-        User currentUser = authenticationUserService.getAuthenticatedUser();
-        Long changedUserId = null;
-        if (currentUser != null) {
-            changedUserId = currentUser.id();
-        }
-
-        EventChangerEvent changerEvent = new EventChangerEvent();
-        changerEvent.setEventId(event.id());
-        changerEvent.setOwnerEventId(event.ownerId());
-        changerEvent.setChangedEventByUserId(changedUserId);
-        changerEvent.setEventSubscribers(registrationRepository.getAllUsersIdWhereEventIdEquals(event.id()));
-
-        return changerEvent;
-    }
-
-    private EventChangerEvent createMessageForKafka(Event eventBefore, Event eventAfter) {
-        EventChangerEvent changerEvent = createMessageForKafka(eventBefore);
-
-        updateField(eventBefore.startDate(), eventAfter.startDate(), changerEvent::setFieldEventDate);
-        updateField(eventBefore.duration(), eventAfter.duration(), changerEvent::setFieldDuration);
-        updateField(eventBefore.locationId(), eventAfter.locationId(), changerEvent::setFieldLocationId);
-        updateField(eventBefore.name(), eventAfter.name(), changerEvent::setFieldEventName);
-        updateField(eventBefore.cost(), eventAfter.cost(), changerEvent::setFieldEventCost);
-        updateField(eventBefore.maxPlaces(), eventAfter.maxPlaces(), changerEvent::setFieldMaxPlaces);
-        updateField(eventBefore.status(), eventAfter.status(), changerEvent::setFieldStatus);
-
-        return changerEvent;
-    }
-
-    private <T> void updateField(T before, T after, Consumer<FieldChange<T>> setter) {
-        if (!Objects.equals(before, after)) {
-            setter.accept(new FieldChange<>(before, after));
-        }
-    }
-
-    private void sendKafkaMessage(String eventsTopicName, EventChangerEvent changerEvent) {
-        ProducerRecord<Long, EventChangerEvent> record = new ProducerRecord<>(
-                eventsTopicName,
-                changerEvent.getEventId() + changerEvent.getOwnerEventId(),
-                changerEvent
-        );
-
-        record.headers().add("messageId", UUID.randomUUID().toString().getBytes());
-
-        CompletableFuture<SendResult<Long, EventChangerEvent>> future = kafkaTemplate.send(record);
-        future.whenComplete((result, exception) -> {
-            if (exception != null) {
-                log.error("Failed to send message: {}", exception.getMessage());
-            } else {
-                log.info("Message sent successfully: {}", result.getRecordMetadata());
-            }
-        });
     }
 }

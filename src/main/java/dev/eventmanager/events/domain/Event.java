@@ -18,4 +18,18 @@ public record Event(
         String status,
         Integer maxPlaces
 ) {
+    public Event(Event event) {
+        this(
+                event.id,
+                event.name(),
+                event.registrations(),
+                event.startDate(),
+                event.duration(),
+                event.cost(),
+                event.ownerId(),
+                event.locationId(),
+                event.status(),
+                event.maxPlaces()
+        );
+    }
 }

@@ -43,12 +43,12 @@ public interface EventRepository extends JpaRepository<EventEntity, Long> {
     );
 
     @Query("""
-            SELECT e.id FROM EventEntity e
+            SELECT e FROM EventEntity e
             WHERE e.date < CURRENT_TIMESTAMP
             AND e.status = :status
             """
     )
-    List<Long> findStartedEventWithStatus(
+    List<EventEntity> findStartedEventWithStatus(
             @Param("status") String status
     );
 
@@ -60,17 +60,17 @@ public interface EventRepository extends JpaRepository<EventEntity, Long> {
             WHERE e.id = :id
             """
     )
-    void updateEventStatusById(
+    EventEntity updateEventStatusById(
             @Param("id") Long id,
             @Param("status") String status);
 
     @Query(value = """
-            SELECT e.id FROM events e
+            SELECT * FROM events e
             WHERE (e.date + INTERVAL '1 MINUTE' * e.duration) < CURRENT_TIMESTAMP
             AND e.status = :status
             """
             , nativeQuery = true)
-    List<Long> findEndedEventWithStatus(
+    List<EventEntity> findEndedEventWithStatus(
             @Param("status") String status
     );
 }

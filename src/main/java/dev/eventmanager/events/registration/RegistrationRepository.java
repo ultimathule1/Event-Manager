@@ -25,5 +25,5 @@ public interface RegistrationRepository extends JpaRepository<RegistrationUserEv
             SELECT r.userId FROM RegistrationUserEventEntity r
             WHERE r.event.id = :eventId
             """)
-    List<Long> getAllUsersIdWhereEventIdEquals(long eventId);
+    List<Long> getAllSubscribersIdWhereEventIdEquals(long eventId);
 }
