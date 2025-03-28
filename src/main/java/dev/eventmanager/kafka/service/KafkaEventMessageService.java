@@ -28,7 +28,6 @@ public class KafkaEventMessageService {
         sendKafkaEventMessage(eventsTopicName, eventBefore, eventAfter, false);
     }
 
-    //TODO:нужно переписать, где этот метод вызывался, т.к. логика немного изменилась
     public void sendKafkaEventMessage(String eventsTopicName, Event eventBefore, Event eventAfter, Boolean isUser) {
         EventChangerEvent messageEvent;
 

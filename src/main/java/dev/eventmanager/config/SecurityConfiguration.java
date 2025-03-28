@@ -112,6 +112,7 @@ public class SecurityConfiguration {
         return new BCryptPasswordEncoder();
     }
 
+    //TODO:Переделать посмотрев warnings в консоли
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
         return web -> web.debug(true).ignoring()

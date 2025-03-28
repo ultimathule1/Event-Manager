@@ -68,7 +68,7 @@ public class SchedulerConfig {
                 .forEach(e -> {
                     EventEntity ee = eventRepository.updateEventStatusById(e.id(), EventStatus.STARTED.name());
                     Event eventAfter = mapperConfig.getMapper().map(ee, Event.class);
-                    kafkaEventMessageService.sendKafkaEventMessage(topicName, e, eventAfter, false);
+                    kafkaEventMessageService.sendKafkaEventMessage(topicName, e, eventAfter);
                 });
 
         return CompletableFuture.completedFuture(null);
@@ -86,7 +86,7 @@ public class SchedulerConfig {
                 .forEach(e -> {
                     EventEntity ee = eventRepository.updateEventStatusById(e.id(), EventStatus.FINISHED.name());
                     Event eventAfter = mapperConfig.getMapper().map(ee, Event.class);
-                    kafkaEventMessageService.sendKafkaEventMessage(topicName, e, eventAfter, false);
+                    kafkaEventMessageService.sendKafkaEventMessage(topicName, e, eventAfter);
                 });
 
         return CompletableFuture.completedFuture(null);
