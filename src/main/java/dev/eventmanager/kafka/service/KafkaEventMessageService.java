@@ -24,27 +24,26 @@ public class KafkaEventMessageService {
         this.kafkaMessageCreator = kafkaMessageCreator;
     }
 
+    public void sendKafkaEventMessage(String eventsTopicName, EventChangerEvent event) {
+        sendMessage(eventsTopicName, event);
+    }
+
     public void sendKafkaEventMessage(String eventsTopicName, Event eventBefore, Event eventAfter) {
         sendKafkaEventMessage(eventsTopicName, eventBefore, eventAfter, false);
     }
 
     public void sendKafkaEventMessage(String eventsTopicName, Event eventBefore, Event eventAfter, Boolean isUser) {
         EventChangerEvent messageEvent;
+        messageEvent = createEventMessageEvent(eventBefore, eventAfter, isUser);
 
-        if (eventAfter == null) {
-            messageEvent = isUser ?
-                    kafkaMessageCreator.createEventMessageForUser(eventBefore) :
-                    kafkaMessageCreator.createEventMessageForSystem(eventBefore);
-        } else {
-            messageEvent = isUser ?
-                    kafkaMessageCreator.createEventMessageForUser(eventBefore, eventAfter) :
-                    kafkaMessageCreator.createEventMessageForSystem(eventBefore, eventAfter);
-        }
+        sendMessage(eventsTopicName, messageEvent);
+    }
 
+    private void sendMessage(String eventsTopicName, EventChangerEvent event) {
         ProducerRecord<Long, EventChangerEvent> record = new ProducerRecord<>(
                 eventsTopicName,
                 null,
-                messageEvent
+                event
         );
 
         record.headers().add("messageId", UUID.randomUUID().toString().getBytes());
@@ -57,5 +56,17 @@ public class KafkaEventMessageService {
                 LOGGER.info("Message sent successfully: {}", result.getRecordMetadata());
             }
         });
+    }
+
+    public EventChangerEvent createEventMessageEvent(Event eventBefore, Event eventAfter, Boolean isUser) {
+        if (eventAfter == null) {
+            return isUser ?
+                    kafkaMessageCreator.createEventMessageForUser(eventBefore) :
+                    kafkaMessageCreator.createEventMessageForSystem(eventBefore);
+        } else {
+            return isUser ?
+                    kafkaMessageCreator.createEventMessageForUser(eventBefore, eventAfter) :
+                    kafkaMessageCreator.createEventMessageForSystem(eventBefore, eventAfter);
+        }
     }
 }

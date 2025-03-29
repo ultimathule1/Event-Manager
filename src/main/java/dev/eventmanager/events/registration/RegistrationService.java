@@ -1,7 +1,6 @@
 package dev.eventmanager.events.registration;
 
 import dev.eventmanager.config.MapperConfig;
-import dev.eventmanager.events.api.EventDto;
 import dev.eventmanager.events.db.EventEntity;
 import dev.eventmanager.events.db.EventRepository;
 import dev.eventmanager.events.domain.Event;

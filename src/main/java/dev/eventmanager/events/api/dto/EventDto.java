@@ -1,4 +1,4 @@
-package dev.eventmanager.events.api;
+package dev.eventmanager.events.api.dto;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;

@@ -1,7 +1,7 @@
 package dev.eventmanager.events.registration;
 
 import dev.eventmanager.config.MapperConfig;
-import dev.eventmanager.events.api.EventDto;
+import dev.eventmanager.events.api.dto.EventDto;
 import dev.eventmanager.events.domain.Event;
 import dev.eventmanager.users.domain.AuthenticationUserService;
 import org.slf4j.Logger;

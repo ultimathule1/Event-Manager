@@ -1,16 +1,17 @@
 package dev.eventmanager.events.domain;
 
 import dev.eventmanager.config.MapperConfig;
-import dev.eventmanager.events.api.EventCreateRequestDto;
-import dev.eventmanager.events.api.EventSearchRequestDto;
-import dev.eventmanager.events.api.EventUpdateRequestDto;
+import dev.eventmanager.events.api.dto.EventCreateRequestDto;
+import dev.eventmanager.events.api.dto.EventSearchRequestDto;
+import dev.eventmanager.events.api.dto.EventUpdateRequestDto;
 import dev.eventmanager.events.api.kafka.event.EventChangerEvent;
-import dev.eventmanager.events.api.kafka.event.FieldChange;
 import dev.eventmanager.events.db.EventEntity;
 import dev.eventmanager.events.db.EventRepository;
 import dev.eventmanager.kafka.service.KafkaEventMessageService;
 import dev.eventmanager.locations.Location;
 import dev.eventmanager.locations.LocationService;
+import dev.eventmanager.retryable_task.RetryableTaskType;
+import dev.eventmanager.retryable_task.service.RetryableTaskService;
 import dev.eventmanager.users.domain.AuthenticationUserService;
 import dev.eventmanager.users.domain.User;
 import dev.eventmanager.users.domain.UserRole;
@@ -35,6 +36,7 @@ public class EventService {
     private final AuthenticationUserService authenticationUserService;
     private final String eventsTopicName;
     private final KafkaEventMessageService kafkaEventMessageService;
+    private final RetryableTaskService retryableTaskService;
 
     public EventService(
             EventRepository eventRepository,
@@ -42,7 +44,7 @@ public class EventService {
             MapperConfig mapperConfig,
             AuthenticationUserService authenticationUserService,
             @Value("${events.notifications.topic.name}") String eventsTopicName,
-            KafkaEventMessageService kafkaEventMessageService) {
+            KafkaEventMessageService kafkaEventMessageService, RetryableTaskService retryableTaskService) {
 
         this.eventRepository = eventRepository;
         this.locationService = locationService;
@@ -50,6 +52,7 @@ public class EventService {
         this.authenticationUserService = authenticationUserService;
         this.eventsTopicName = eventsTopicName;
         this.kafkaEventMessageService = kafkaEventMessageService;
+        this.retryableTaskService = retryableTaskService;
     }
 
     public Event createEvent(EventCreateRequestDto eventCreateRequestDto) {
@@ -112,6 +115,12 @@ public class EventService {
         foundEventEntity.setStatus(EventStatus.CANCELLED.name());
         eventRepository.save(foundEventEntity);
         Event eventAfter = mapperConfig.getMapper().map(foundEventEntity, Event.class);
+
+        //NEW HERE
+        EventChangerEvent eventChanger = kafkaEventMessageService.createEventMessageEvent(eventBefore, eventAfter, true);
+        retryableTaskService.createRetryableTask(eventChanger, RetryableTaskType.SEND_CREATE_NOTIFICATION_REQUEST);
+
+        /////////
 
         kafkaEventMessageService.sendKafkaEventMessage(eventsTopicName, eventBefore, eventAfter, true);
 

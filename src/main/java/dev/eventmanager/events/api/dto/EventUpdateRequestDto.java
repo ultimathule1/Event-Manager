@@ -1,33 +1,30 @@
-package dev.eventmanager.events.api;
+package dev.eventmanager.events.api.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
-public record EventCreateRequestDto(
-        @NotEmpty
-        String name,
-        @NotNull
-        @Positive
+public record EventUpdateRequestDto(
+        @Size(min = 1)
+        @JsonProperty("name")
+        String eventName,
+        @PositiveOrZero
         Integer maxPlaces,
-        @NotNull
-        @Future
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
-        OffsetDateTime date,
-        @NotNull
+        @Future
+        @JsonProperty("date")
+        OffsetDateTime startDate,
         @PositiveOrZero
         BigDecimal cost,
-        @NotNull
         @Min(30)
         Integer duration,
-        @NotNull
+        @PositiveOrZero
         Long locationId
 ) {
 }
