@@ -7,7 +7,6 @@ import dev.eventmanager.events.api.dto.EventUpdateRequestDto;
 import dev.eventmanager.events.api.kafka.event.EventChangerEvent;
 import dev.eventmanager.events.db.EventEntity;
 import dev.eventmanager.events.db.EventRepository;
-import dev.eventmanager.kafka.KafkaEventProperties;
 import dev.eventmanager.kafka.service.KafkaEventMessageService;
 import dev.eventmanager.locations.Location;
 import dev.eventmanager.locations.LocationService;
@@ -20,7 +19,6 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.stereotype.Service;
 

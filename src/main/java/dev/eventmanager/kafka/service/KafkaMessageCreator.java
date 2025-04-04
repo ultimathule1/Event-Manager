@@ -38,7 +38,7 @@ public class KafkaMessageCreator {
     }
 
     public EventChangerEvent createEventMessageForUser(Event event) {
-        return createBaseMessage(event,getAuthenticatedUserId());
+        return createBaseMessage(event, getAuthenticatedUserId());
     }
 
 
@@ -69,7 +69,7 @@ public class KafkaMessageCreator {
     }
 
     private Long getAuthenticatedUserId() {
-        User user =authenticationUserService.getAuthenticatedUser();
+        User user = authenticationUserService.getAuthenticatedUser();
         return user == null ? null : user.id();
     }
 }

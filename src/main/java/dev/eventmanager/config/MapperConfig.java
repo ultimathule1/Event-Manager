@@ -1,7 +1,6 @@
 package dev.eventmanager.config;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import dev.eventmanager.events.api.dto.EventDto;
@@ -118,7 +117,7 @@ public class MapperConfig {
                     try {
                         event = objectMapper.readValue(task.getPayload(), EventChangerEvent.class);
                     } catch (JsonProcessingException e) {
-                        throw new RuntimeException("Failed to convert JSON to Order" ,e);
+                        throw new RuntimeException("Failed to convert JSON to Order", e);
                     }
 
                     return event;

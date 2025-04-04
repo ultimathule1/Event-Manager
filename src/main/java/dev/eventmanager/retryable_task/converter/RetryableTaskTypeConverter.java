@@ -10,7 +10,7 @@ public class RetryableTaskTypeConverter implements AttributeConverter<RetryableT
     @Override
     public String convertToDatabaseColumn(RetryableTaskType retryableTaskType) {
         if (retryableTaskType == null) {
-            return  null;
+            return null;
         }
         return retryableTaskType.getValue();
     }

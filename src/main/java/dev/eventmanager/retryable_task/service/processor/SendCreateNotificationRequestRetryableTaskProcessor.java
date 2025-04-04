@@ -7,12 +7,9 @@ import dev.eventmanager.kafka.service.KafkaEventMessageService;
 import dev.eventmanager.retryable_task.db.entities.RetryableTask;
 import dev.eventmanager.retryable_task.service.RetryableTaskService;
 import lombok.extern.slf4j.Slf4j;
-import org.aspectj.apache.bcel.generic.RET;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 @Slf4j

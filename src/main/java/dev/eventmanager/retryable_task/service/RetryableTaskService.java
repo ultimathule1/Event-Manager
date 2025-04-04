@@ -9,7 +9,6 @@ import dev.eventmanager.retryable_task.db.entities.RetryableTask;
 import dev.eventmanager.retryable_task.db.repository.RetryableTaskRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;

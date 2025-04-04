@@ -4,7 +4,6 @@ import dev.eventmanager.events.db.EventEntity;
 import dev.eventmanager.events.db.EventRepository;
 import dev.eventmanager.events.domain.Event;
 import dev.eventmanager.events.domain.EventStatus;
-import dev.eventmanager.kafka.KafkaEventProperties;
 import dev.eventmanager.kafka.service.KafkaEventMessageService;
 import dev.eventmanager.retryable_task.RetryableTaskType;
 import dev.eventmanager.retryable_task.service.RetryableTaskService;

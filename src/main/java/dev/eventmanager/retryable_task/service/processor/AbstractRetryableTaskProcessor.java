@@ -2,7 +2,6 @@ package dev.eventmanager.retryable_task.service.processor;
 
 import dev.eventmanager.retryable_task.db.entities.RetryableTask;
 import dev.eventmanager.retryable_task.service.RetryableTaskService;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
