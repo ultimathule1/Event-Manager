@@ -1,4 +1,4 @@
-package dev.eventmanager.retryable_task.service;
+package dev.eventmanager.retryable_task;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;

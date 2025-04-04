@@ -2,6 +2,7 @@ package dev.eventmanager.retryable_task.service;
 
 import dev.eventmanager.config.MapperConfig;
 import dev.eventmanager.events.api.kafka.event.EventChangerEvent;
+import dev.eventmanager.retryable_task.RetryableTaskProperties;
 import dev.eventmanager.retryable_task.RetryableTaskStatus;
 import dev.eventmanager.retryable_task.RetryableTaskType;
 import dev.eventmanager.retryable_task.db.entities.RetryableTask;
@@ -17,7 +18,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class RetryableTaskService {
@@ -40,6 +40,7 @@ public class RetryableTaskService {
                 type, currentTime, RetryableTaskStatus.IN_PROGRESS, pageable
         );
 
+        //Write retry time to the future so that another scheduler cannot work with the same data
         for (RetryableTask retryableTask : retryableTasks) {
             retryableTask.setRetryTime(currentTime.plus(Duration.ofSeconds(properties.getTimeoutInSeconds())));
         }
@@ -50,5 +51,10 @@ public class RetryableTaskService {
     @Transactional
     public void markRetryableTasksAsCompleted(List<RetryableTask> retryableTasks) {
         retryableTaskRepository.updateRetryableTasks(retryableTasks, RetryableTaskStatus.SUCCESS);
+    }
+
+    @Transactional
+    public void deleteRetryableTasksThanMoreWeek() {
+        retryableTaskRepository.deleteAllRetryableTasksThatExpiredMoreWeek();
     }
 }

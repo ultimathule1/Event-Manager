@@ -3,6 +3,7 @@ version: '3.7'
 services:
   zookeeper-event-1:
     image: confluentinc/cp-zookeeper:7.5.0
+    restart: always
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
     ports:
@@ -10,6 +11,7 @@ services:
 
   kafka:
     image: confluentinc/cp-kafka:7.5.0
+    restart: always
     depends_on:
       - zookeeper-event-1
     environment:
@@ -20,60 +22,22 @@ services:
     ports:
       - "9092:9092"
 
-  #postgres db for idempotency
-#  postgres:
-#    image: postgres:14
-#    environment:
-#      POSTGRES_USER: postgres
-#      POSTGRES_PASSWORD: postgres_postgres
-#      POSTGRES_DB: idempotency_db
-#    ports:
-#      - "5434:5432"
+  postgres_event_notification:
+    image: postgres:17.2
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: root
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./data/postgres_event_notification:/var/lib/postgresql/data
 
-#  kafka-event-1:
-#    image: confluentinc/cp-kafka:7.5.0
-#    depends_on:
-#      - zookeeper-event-1
-#    environment:
-#      KAFKA_BROKER_ID: 1
-#      KAFKA_ZOOKEEPER_CONNECT: zookeeper-event-1:2181
-#      KAFKA_LISTENERS: INTERNAL://:9092,EXTERNAL://:9093
-#      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka-event-1:9092, EXTERNAL://localhost:9092
-#      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
-#      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
-#      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
-#      KAFKA_NUM_PARTITIONS: 3
-#    ports:
-#      - "9092:9093"
-#
-#  kafka-event-2:
-#    image: confluentinc/cp-kafka:7.5.0
-#    depends_on:
-#      - zookeeper-event-1
-#    environment:
-#      KAFKA_BROKER_ID: 2
-#      KAFKA_ZOOKEEPER_CONNECT: zookeeper-event-1:2181
-#      KAFKA_LISTENERS: INTERNAL://:9092,EXTERNAL://:9093
-#      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka-event-2:9092, EXTERNAL://localhost:9093
-#      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
-#      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
-#      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
-#      KAFKA_NUM_PARTITIONS: 3
-#    ports:
-#      - "9093:9093"
-#
-#  kafka-event-3:
-#    image: confluentinc/cp-kafka:7.5.0
-#    depends_on:
-#      - zookeeper-event-1
-#    environment:
-#      KAFKA_BROKER_ID: 3
-#      KAFKA_ZOOKEEPER_CONNECT: zookeeper-event-1:2181
-#      KAFKA_LISTENERS: INTERNAL://:9092,EXTERNAL://:9093
-#      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka-event-3:9092, EXTERNAL://localhost:9094
-#      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
-#      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
-#      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
-#      KAFKA_NUM_PARTITIONS: 3
-#    ports:
-#      - "9094:9093"
+  postgres_event_manager:
+    image: postgres:17.2
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: root
+    ports:
+      - "9981:5432"
+    volumes:
+      - ./data/postgres_event_manager:/var/lib/postgresql/data

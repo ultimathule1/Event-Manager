@@ -1,14 +1,9 @@
 package dev.eventmanager.retryable_task.scheduler;
 
-import dev.eventmanager.config.MapperConfig;
-import dev.eventmanager.kafka.service.KafkaEventMessageService;
 import dev.eventmanager.retryable_task.RetryableTaskType;
-import dev.eventmanager.retryable_task.service.RetryableTaskProcessor;
 import dev.eventmanager.retryable_task.service.RetryableTaskService;
-import dev.eventmanager.retryable_task.service.SendCreateNotificationRequestRetryableTaskProcessor;
-import lombok.RequiredArgsConstructor;
+import dev.eventmanager.retryable_task.service.processor.RetryableTaskProcessor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -18,28 +13,18 @@ import java.util.Map;
 @Slf4j
 public class RetryableTaskScheduler {
     private final RetryableTaskService retryableTaskService;
-    private final MapperConfig mapperConfig;
-    private final KafkaEventMessageService kafkaEventMessageService;
     private final Map<RetryableTaskType, RetryableTaskProcessor> taskProcessors;
 
     public RetryableTaskScheduler(
             RetryableTaskService retryableTaskService,
-            MapperConfig mapperConfig,
-            KafkaEventMessageService kafkaEventMessageService) {
+            Map<RetryableTaskType, RetryableTaskProcessor> taskProcessors
+    ) {
         this.retryableTaskService = retryableTaskService;
-        this.mapperConfig = mapperConfig;
-        this.kafkaEventMessageService = kafkaEventMessageService;
-        taskProcessors = Map.of(
-                RetryableTaskType.SEND_CREATE_NOTIFICATION_REQUEST,
-                new SendCreateNotificationRequestRetryableTaskProcessor(
-                        mapperConfig,
-                        kafkaEventMessageService
-                )
-        );
+        this.taskProcessors = taskProcessors;
     }
 
 
-    @Scheduled(fixedRate = 5000)
+    @Scheduled(cron = "${scheduler.interval.cron.every-five-seconds}")
     public void executeRetryableTasks() {
         log.info("Starting retryable task processors");
         for (Map.Entry<RetryableTaskType, RetryableTaskProcessor> entry : taskProcessors.entrySet()) {
@@ -50,7 +35,7 @@ public class RetryableTaskScheduler {
 
             if (retryableTasks.isEmpty()) {
                 log.info("No retryable tasks found for type {}", taskType);
-                return;
+                continue;
             }
 
             taskProcessor.processRetryableTasks(retryableTasks);
@@ -59,4 +44,10 @@ public class RetryableTaskScheduler {
         log.info("Completed all retryable task processors");
     }
 
+    @Scheduled(cron = "${scheduler.interval.cron.every-ten-minutes}")
+    public void clearRetryableTasksThatCreatedMoreThanWeek() {
+        log.info("Starting clear retryable task processors that were created more than a week");
+        retryableTaskService.deleteRetryableTasksThanMoreWeek();
+        log.info("The scheduler to clear retryable task processors that were created more than a week is finished");
+    }
 }

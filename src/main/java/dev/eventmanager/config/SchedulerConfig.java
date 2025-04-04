@@ -4,10 +4,12 @@ import dev.eventmanager.events.db.EventEntity;
 import dev.eventmanager.events.db.EventRepository;
 import dev.eventmanager.events.domain.Event;
 import dev.eventmanager.events.domain.EventStatus;
+import dev.eventmanager.kafka.KafkaEventProperties;
 import dev.eventmanager.kafka.service.KafkaEventMessageService;
+import dev.eventmanager.retryable_task.RetryableTaskType;
+import dev.eventmanager.retryable_task.service.RetryableTaskService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.Async;
@@ -28,18 +30,19 @@ public class SchedulerConfig {
     private static final Logger log = LoggerFactory.getLogger(SchedulerConfig.class);
     private final EventRepository eventRepository;
     private final KafkaEventMessageService kafkaEventMessageService;
+    private final RetryableTaskService retryableTaskService;
     private final MapperConfig mapperConfig;
-    private final String topicName;
 
     public SchedulerConfig(
             EventRepository eventRepository,
             KafkaEventMessageService kafkaEventMessageService,
-            MapperConfig mapperConfig,
-            @Value("${events.notifications.topic.name}") String topicName) {
+            RetryableTaskService retryableTaskService,
+            MapperConfig mapperConfig) {
+
         this.eventRepository = eventRepository;
         this.kafkaEventMessageService = kafkaEventMessageService;
+        this.retryableTaskService = retryableTaskService;
         this.mapperConfig = mapperConfig;
-        this.topicName = topicName;
     }
 
     @Scheduled(cron = "${scheduler.interval.cron.every-minute}")
@@ -68,7 +71,8 @@ public class SchedulerConfig {
                 .forEach(e -> {
                     EventEntity ee = eventRepository.updateEventStatusById(e.id(), EventStatus.STARTED.name());
                     Event eventAfter = mapperConfig.getMapper().map(ee, Event.class);
-                    kafkaEventMessageService.sendKafkaEventMessage(topicName, e, eventAfter);
+                    var messageEvent = kafkaEventMessageService.createEventMessageEvent(e, eventAfter, false);
+                    retryableTaskService.createRetryableTask(messageEvent, RetryableTaskType.SEND_CREATE_NOTIFICATION_REQUEST);
                 });
 
         return CompletableFuture.completedFuture(null);
@@ -86,7 +90,8 @@ public class SchedulerConfig {
                 .forEach(e -> {
                     EventEntity ee = eventRepository.updateEventStatusById(e.id(), EventStatus.FINISHED.name());
                     Event eventAfter = mapperConfig.getMapper().map(ee, Event.class);
-                    kafkaEventMessageService.sendKafkaEventMessage(topicName, e, eventAfter);
+                    var messageEvent = kafkaEventMessageService.createEventMessageEvent(e, eventAfter, false);
+                    retryableTaskService.createRetryableTask(messageEvent, RetryableTaskType.SEND_CREATE_NOTIFICATION_REQUEST);
                 });
 
         return CompletableFuture.completedFuture(null);

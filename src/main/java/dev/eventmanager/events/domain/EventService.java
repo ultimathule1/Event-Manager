@@ -7,6 +7,7 @@ import dev.eventmanager.events.api.dto.EventUpdateRequestDto;
 import dev.eventmanager.events.api.kafka.event.EventChangerEvent;
 import dev.eventmanager.events.db.EventEntity;
 import dev.eventmanager.events.db.EventRepository;
+import dev.eventmanager.kafka.KafkaEventProperties;
 import dev.eventmanager.kafka.service.KafkaEventMessageService;
 import dev.eventmanager.locations.Location;
 import dev.eventmanager.locations.LocationService;
@@ -34,7 +35,6 @@ public class EventService {
     private final LocationService locationService;
     private final MapperConfig mapperConfig;
     private final AuthenticationUserService authenticationUserService;
-    private final String eventsTopicName;
     private final KafkaEventMessageService kafkaEventMessageService;
     private final RetryableTaskService retryableTaskService;
 
@@ -43,14 +43,12 @@ public class EventService {
             LocationService locationService,
             MapperConfig mapperConfig,
             AuthenticationUserService authenticationUserService,
-            @Value("${events.notifications.topic.name}") String eventsTopicName,
             KafkaEventMessageService kafkaEventMessageService, RetryableTaskService retryableTaskService) {
 
         this.eventRepository = eventRepository;
         this.locationService = locationService;
         this.mapperConfig = mapperConfig;
         this.authenticationUserService = authenticationUserService;
-        this.eventsTopicName = eventsTopicName;
         this.kafkaEventMessageService = kafkaEventMessageService;
         this.retryableTaskService = retryableTaskService;
     }
@@ -94,6 +92,7 @@ public class EventService {
      * The event is not deleted from the database, but goes only into the mode of canceled
      * Can be deleted either an admin or the creator of the event.
      */
+    @Transactional
     public void cancelEvent(Long eventId) {
         User currentUser = authenticationUserService.getAuthenticatedUser();
 
@@ -122,7 +121,7 @@ public class EventService {
 
         /////////
 
-        kafkaEventMessageService.sendKafkaEventMessage(eventsTopicName, eventBefore, eventAfter, true);
+        //kafkaEventMessageService.sendKafkaEventMessage(eventsTopicName, eventBefore, eventAfter, true);
 
         log.info("event cancelled = {}", foundEventEntity);
     }
@@ -152,8 +151,10 @@ public class EventService {
         eventRepository.save(eventEntity);
         Event updatedEvent = mapperConfig.getMapper().map(eventEntity, Event.class);
 
-        kafkaEventMessageService.sendKafkaEventMessage(eventsTopicName,beforeUpdateEvent,updatedEvent, true);
+//        kafkaEventMessageService.sendKafkaEventMessage(eventsTopicName,beforeUpdateEvent,updatedEvent, true);
 
+        EventChangerEvent eventChanger = kafkaEventMessageService.createEventMessageEvent(beforeUpdateEvent, updatedEvent, true);
+        retryableTaskService.createRetryableTask(eventChanger, RetryableTaskType.SEND_CREATE_NOTIFICATION_REQUEST);
         log.info("event updated = {}", updatedEvent);
 
         return updatedEvent;

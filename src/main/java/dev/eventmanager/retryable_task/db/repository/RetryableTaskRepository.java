@@ -4,8 +4,10 @@ import dev.eventmanager.retryable_task.RetryableTaskStatus;
 import dev.eventmanager.retryable_task.RetryableTaskType;
 import dev.eventmanager.retryable_task.db.entities.RetryableTask;
 import jakarta.persistence.LockModeType;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
@@ -17,15 +19,27 @@ public interface RetryableTaskRepository extends CrudRepository<RetryableTask, U
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("""
-        SELECT r FROM RetryableTask r where r.type = :type
-        AND r.retryTime <= :retryTime
-        AND r.status = :status
-        ORDER BY r.retryTime ASC
-        """)
+            SELECT r FROM RetryableTask r where r.type = :type
+            AND r.retryTime <= :retryTime
+            AND r.status = :status
+            ORDER BY r.retryTime ASC
+            """)
     List<RetryableTask> findRetryableTaskForProcessing(RetryableTaskType type, Instant retryTime, RetryableTaskStatus status, Pageable pageable);
 
     @Query("""
-        UPDATE RetryableTask r SET r.status = :status WHERE r IN :retryableTasks
-    """)
+            UPDATE RetryableTask r SET r.status = :status WHERE r IN :retryableTasks
+            """)
+    @Modifying
+    @Transactional
     void updateRetryableTasks(List<RetryableTask> retryableTasks, RetryableTaskStatus status);
+
+    @Query(value = """
+            DELETE FROM retryable_task r
+            WHERE (r.created_at + INTERVAL '1 WEEK') < CURRENT_TIMESTAMP
+            """,
+            nativeQuery = true
+    )
+    @Modifying
+    @Transactional
+    void deleteAllRetryableTasksThatExpiredMoreWeek();
 }

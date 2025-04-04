@@ -1,6 +1,7 @@
 package dev.eventmanager.config;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import dev.eventmanager.events.api.dto.EventDto;
@@ -95,7 +96,7 @@ public class MapperConfig {
 
                     RetryableTask task = new RetryableTask();
                     task.setId(UUID.randomUUID());
-                    task.setVersion(0);
+                    task.setVersion(null);
                     Instant now = Instant.now();
                     task.setCreatedAt(now);
                     task.setUpdatedAt(now);
@@ -105,6 +106,22 @@ public class MapperConfig {
                     task.setStatus(RetryableTaskStatus.IN_PROGRESS);
 
                     return task;
+                });
+
+        mapper.createTypeMap(RetryableTask.class, EventChangerEvent.class)
+                .setConverter(ctx -> {
+                    RetryableTask task = ctx.getSource();
+                    EventChangerEvent event;
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    objectMapper.registerModule(new JavaTimeModule());
+
+                    try {
+                        event = objectMapper.readValue(task.getPayload(), EventChangerEvent.class);
+                    } catch (JsonProcessingException e) {
+                        throw new RuntimeException("Failed to convert JSON to Order" ,e);
+                    }
+
+                    return event;
                 });
 
 

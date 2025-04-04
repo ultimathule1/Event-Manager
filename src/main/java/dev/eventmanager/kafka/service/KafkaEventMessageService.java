@@ -24,8 +24,8 @@ public class KafkaEventMessageService {
         this.kafkaMessageCreator = kafkaMessageCreator;
     }
 
-    public void sendKafkaEventMessage(String eventsTopicName, EventChangerEvent event) {
-        sendMessage(eventsTopicName, event);
+    public CompletableFuture<SendResult<Long, EventChangerEvent>> sendKafkaEventMessage(String eventsTopicName, EventChangerEvent event) {
+        return sendMessage(eventsTopicName, event);
     }
 
     public void sendKafkaEventMessage(String eventsTopicName, Event eventBefore, Event eventAfter) {
@@ -39,7 +39,7 @@ public class KafkaEventMessageService {
         sendMessage(eventsTopicName, messageEvent);
     }
 
-    private void sendMessage(String eventsTopicName, EventChangerEvent event) {
+    private CompletableFuture<SendResult<Long, EventChangerEvent>> sendMessage(String eventsTopicName, EventChangerEvent event) {
         ProducerRecord<Long, EventChangerEvent> record = new ProducerRecord<>(
                 eventsTopicName,
                 null,
@@ -49,6 +49,7 @@ public class KafkaEventMessageService {
         record.headers().add("messageId", UUID.randomUUID().toString().getBytes());
 
         CompletableFuture<SendResult<Long, EventChangerEvent>> future = kafkaTemplate.send(record);
+
         future.whenComplete((result, exception) -> {
             if (exception != null) {
                 LOGGER.error("Failed to send message: {}", exception.getMessage());
@@ -56,6 +57,8 @@ public class KafkaEventMessageService {
                 LOGGER.info("Message sent successfully: {}", result.getRecordMetadata());
             }
         });
+
+        return future;
     }
 
     public EventChangerEvent createEventMessageEvent(Event eventBefore, Event eventAfter, Boolean isUser) {
