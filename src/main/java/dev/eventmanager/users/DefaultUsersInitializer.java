@@ -5,7 +5,6 @@ import dev.eventmanager.users.domain.UserRole;
 import dev.eventmanager.users.domain.UserService;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -34,7 +33,7 @@ public class DefaultUsersInitializer {
             );
         }
 
-        if(!userService.existsByLogin(DEFAULT_ADMIN_LOGIN)) {
+        if (!userService.existsByLogin(DEFAULT_ADMIN_LOGIN)) {
             createUser(
                     DEFAULT_ADMIN_LOGIN,
                     DEFAULT_ADMIN_PASSWORD,

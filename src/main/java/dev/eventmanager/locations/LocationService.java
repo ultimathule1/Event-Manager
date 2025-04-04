@@ -3,6 +3,8 @@ package dev.eventmanager.locations;
 import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,7 +22,9 @@ public class LocationService {
     }
 
     public List<Location> getAllLocations() {
-        return locationRepository.findAll()
+        Pageable pageable = PageRequest.of(0, 3);
+
+        return locationRepository.findAll(pageable)
                 .stream()
                 .map(locationEntityMapper::toDomain)
                 .toList();

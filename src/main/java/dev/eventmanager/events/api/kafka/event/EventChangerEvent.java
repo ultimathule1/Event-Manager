@@ -16,7 +16,6 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-//TODO:Написать самому Builder
 @Builder
 public class EventChangerEvent {
     @NotNull

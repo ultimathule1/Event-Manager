@@ -101,7 +101,6 @@ public class EventController {
                 .body(events);
     }
 
-    //TODO:Добавить Pageable
     @PostMapping("/search")
     public ResponseEntity<List<EventDto>> searchEvents(
             @RequestBody EventSearchRequestDto eventSearchRequestDto

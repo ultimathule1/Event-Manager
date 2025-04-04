@@ -81,6 +81,13 @@ public class SecurityConfiguration {
                                 .requestMatchers(HttpMethod.POST, "/events/registrations/{id}")
                                 .hasAnyAuthority("USER")
 
+                                .requestMatchers("/css/**", "/js/**", "/img/**", "/lib/**", "/favicon.ico",
+                                        "/swagger-ui/**", "/v2/api-docs", "/v3/api-docs",
+                                        "/configuration/ui", "/swagger-resources/**",
+                                        "/configuration/security", "/swagger-ui.html",
+                                        "/webjars/**", "/v3/api-docs/swagger-config", "/openapi.yaml")
+                                .permitAll()
+
                                 .anyRequest().authenticated()
                 )
                 .exceptionHandling(exception -> {
@@ -112,25 +119,8 @@ public class SecurityConfiguration {
         return new BCryptPasswordEncoder();
     }
 
-    //TODO:Переделать посмотрев warnings в консоли
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
-        return web -> web.debug(true).ignoring()
-                .requestMatchers("/css/**",
-                        "/js/**",
-                        "/img/**",
-                        "/lib/**",
-                        "/favicon.ico",
-                        "/swagger-ui/**",
-                        "/v2/api-docs",
-                        "/v3/api-docs",
-                        "/configuration/ui",
-                        "/swagger-resources/**",
-                        "/configuration/security",
-                        "/swagger-ui.html",
-                        "/webjars/**",
-                        "/v3/api-docs/swagger-config",
-                        "/openapi.yaml"
-                );
+        return web -> web.debug(true);
     }
 }

@@ -115,13 +115,8 @@ public class EventService {
         eventRepository.save(foundEventEntity);
         Event eventAfter = mapperConfig.getMapper().map(foundEventEntity, Event.class);
 
-        //NEW HERE
         EventChangerEvent eventChanger = kafkaEventMessageService.createEventMessageEvent(eventBefore, eventAfter, true);
         retryableTaskService.createRetryableTask(eventChanger, RetryableTaskType.SEND_CREATE_NOTIFICATION_REQUEST);
-
-        /////////
-
-        //kafkaEventMessageService.sendKafkaEventMessage(eventsTopicName, eventBefore, eventAfter, true);
 
         log.info("event cancelled = {}", foundEventEntity);
     }
