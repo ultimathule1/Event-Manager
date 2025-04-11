@@ -9,14 +9,16 @@ import dev.eventmanager.retryable_task.RetryableTaskType;
 import dev.eventmanager.retryable_task.service.RetryableTaskService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -44,7 +46,8 @@ public class SchedulerConfig {
         this.mapperConfig = mapperConfig;
     }
 
-    @Scheduled(cron = "${scheduler.interval.cron.every-minute}")
+    //    @Scheduled(cron = "${scheduler.interval.cron.every-minute}")
+    @Scheduled(fixedRate = 10000)
     public void schedulerForCheckEventStatus() {
         log.info("the scheduler for changing the event status started");
         Instant before = Instant.now();
@@ -59,41 +62,83 @@ public class SchedulerConfig {
                 schedulerRuntimeInSeconds(before, after));
     }
 
-    @Async
     CompletableFuture<Void> processStartedEvents() {
-        List<Event> startedEventsList = eventRepository.findStartedEventWithStatus(EventStatus.WAIT_START.name())
-                .stream()
-                .map(ee -> mapperConfig.getMapper().map(ee, Event.class))
-                .toList();
+        System.out.println(eventRepository.getDates() + " OffsetDateTime" + OffsetDateTime.now(ZoneOffset.UTC));
+        List<EventEntity> startedEventsList =
+                eventRepository.findStartedEventWithStatus(EventStatus.WAIT_START.name(), OffsetDateTime.now(ZoneOffset.UTC));
 
-        startedEventsList
-                .forEach(e -> {
-                    EventEntity ee = eventRepository.updateEventStatusById(e.id(), EventStatus.STARTED.name());
-                    Event eventAfter = mapperConfig.getMapper().map(ee, Event.class);
-                    var messageEvent = kafkaEventMessageService.createEventMessageEvent(e, eventAfter, false);
-                    retryableTaskService.createRetryableTask(messageEvent, RetryableTaskType.SEND_CREATE_NOTIFICATION_REQUEST);
-                });
+        for (EventEntity startedEvent : startedEventsList) {
+            int amountUpdates = eventRepository.updateEventStatusById(startedEvent.getId(), EventStatus.STARTED.name());
+
+            logAndSendToKafka(startedEvent, EventStatus.STARTED, amountUpdates);
+        }
+        //.map(ee -> mapperConfig.getMapper().map(ee, Event.class))
+        //.toList();
+
+//        startedEventsList
+//                .forEach(e -> {
+//                    eventRepository.updateEventStatusById(e.id(), EventStatus.STARTED.name());
+//                    Event eventAfter = mapperConfig.getMapper().map(ee, Event.class);
+//                    var messageEvent = kafkaEventMessageService.createEventMessageEvent(e, eventAfter, false);
+//                    retryableTaskService.createRetryableTask(messageEvent, RetryableTaskType.SEND_CREATE_NOTIFICATION_REQUEST);
+//                });
 
         return CompletableFuture.completedFuture(null);
     }
 
-    @Async
     CompletableFuture<Void> processEndedEvents() {
-        List<EventEntity> eventsList = eventRepository.findEndedEventWithStatus(EventStatus.STARTED.name());
-        List<Event> endedEventsList = eventsList
-                .stream()
-                .map(ee -> mapperConfig.getMapper().map(ee, Event.class))
-                .toList();
+        List<EventEntity> eventsList = findEndedEventsWithRegistrations(EventStatus.STARTED);
 
-        endedEventsList
-                .forEach(e -> {
-                    EventEntity ee = eventRepository.updateEventStatusById(e.id(), EventStatus.FINISHED.name());
-                    Event eventAfter = mapperConfig.getMapper().map(ee, Event.class);
-                    var messageEvent = kafkaEventMessageService.createEventMessageEvent(e, eventAfter, false);
-                    retryableTaskService.createRetryableTask(messageEvent, RetryableTaskType.SEND_CREATE_NOTIFICATION_REQUEST);
-                });
+        for (EventEntity endedEvent : eventsList) {
+            int amountUpdates = eventRepository.updateEventStatusById(endedEvent.getId(), EventStatus.FINISHED.name());
+
+            logAndSendToKafka(endedEvent, EventStatus.FINISHED, amountUpdates);
+        }
+//        List<Event> endedEventsList = eventsList
+//                .stream()
+//                .map(ee -> mapperConfig.getMapper().map(ee, Event.class))
+//                .toList();
+//
+//        endedEventsList
+//                .forEach(e -> {
+//                    EventEntity ee = eventRepository.updateEventStatusById(e.id(), EventStatus.FINISHED.name());
+//                    Event eventAfter = mapperConfig.getMapper().map(ee, Event.class);
+//                    var messageEvent = kafkaEventMessageService.createEventMessageEvent(e, eventAfter, false);
+//                    retryableTaskService.createRetryableTask(messageEvent, RetryableTaskType.SEND_CREATE_NOTIFICATION_REQUEST);
+//                });
 
         return CompletableFuture.completedFuture(null);
+    }
+
+    private void logAndSendToKafka(EventEntity eventEntity, EventStatus eventStatus, int amountUpdates) {
+        if (amountUpdates == 0) {
+            log.warn("Found event with id={} were not found during the update", eventEntity.getId());
+            return;
+        }
+
+        EventEntity endedEventAfter = new EventEntity();
+        BeanUtils.copyProperties(eventEntity, endedEventAfter);
+        endedEventAfter.setStatus(eventStatus.name());
+
+        Event eventBefore = mapperConfig.getMapper().map(eventEntity, Event.class);
+        Event eventAfter = mapperConfig.getMapper().map(endedEventAfter, Event.class);
+        log.debug("event with id={} changed status to {}", endedEventAfter.getId(), endedEventAfter.getStatus());
+
+        if (!eventAfter.registrations().isEmpty()) {
+            var messageEvent = kafkaEventMessageService.createEventMessageEvent(eventBefore, eventAfter, false);
+            retryableTaskService.createRetryableTask(messageEvent, RetryableTaskType.SEND_CREATE_NOTIFICATION_REQUEST);
+
+            log.debug("event with id={} send to kafka", eventAfter.id());
+        }
+    }
+
+    private List<EventEntity> findEndedEventsWithRegistrations(EventStatus status) {
+        List<Long> eventIdsWithStatus = eventRepository.findEndedEventWithStatus(status.name(), OffsetDateTime.now(ZoneOffset.UTC));
+        if (eventIdsWithStatus.isEmpty()) {
+            return List.of();
+        }
+
+        return eventRepository.findAllWithRegistrations(eventIdsWithStatus);
     }
 
     private String schedulerRuntimeInSeconds(Instant before, Instant after) {

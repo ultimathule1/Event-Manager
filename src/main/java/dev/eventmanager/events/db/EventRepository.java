@@ -1,6 +1,8 @@
 package dev.eventmanager.events.db;
 
+import dev.eventmanager.events.domain.Event;
 import jakarta.transaction.Transactional;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -9,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface EventRepository extends JpaRepository<EventEntity, Long> {
 
@@ -44,12 +47,14 @@ public interface EventRepository extends JpaRepository<EventEntity, Long> {
 
     @Query("""
             SELECT e FROM EventEntity e
-            WHERE e.date < CURRENT_TIMESTAMP
+            LEFT JOIN FETCH e.registrations
+            WHERE e.date < :now
             AND e.status = :status
             """
     )
     List<EventEntity> findStartedEventWithStatus(
-            @Param("status") String status
+            @Param("status") String status,
+            OffsetDateTime now
     );
 
     @Transactional
@@ -60,17 +65,58 @@ public interface EventRepository extends JpaRepository<EventEntity, Long> {
             WHERE e.id = :id
             """
     )
-    EventEntity updateEventStatusById(
+    int updateEventStatusById(
             @Param("id") Long id,
             @Param("status") String status);
 
     @Query(value = """
-            SELECT * FROM events e
-            WHERE (e.date + INTERVAL '1 MINUTE' * e.duration) < CURRENT_TIMESTAMP
+            SELECT e.id FROM events e
+            LEFT JOIN registrations r ON r.event_id = e.id
+            WHERE (e.date + INTERVAL '1 MINUTE' * e.duration) < :now
             AND e.status = :status
             """
             , nativeQuery = true)
-    List<EventEntity> findEndedEventWithStatus(
-            @Param("status") String status
+    List<Long> findEndedEventWithStatus(
+            @Param("status") String status,
+            @Param("now") OffsetDateTime now
     );
+
+    @Query("SELECT e.date FROM EventEntity e")
+    List<OffsetDateTime> getDates();
+
+    @EntityGraph(value = "Event.withRegistrations", type = EntityGraph.EntityGraphType.LOAD)
+    @Query(value = """
+        SELECT e FROM EventEntity e
+        WHERE e.id IN :ids
+    """)
+    List<EventEntity> findAllWithRegistrations(@Param("ids") List<Long> ids);
+
+//    @EntityGraph(value = "Event.withRegistrations", type = EntityGraph.EntityGraphType.LOAD)
+//    @Query(value = """
+//            SELECT e
+//            FROM EventEntity e
+//            WHERE (e.date + (e.duration * INTERVAL '1 minute')) < CURRENT_TIMESTAMP
+//              AND e.status = :status
+//            """)
+//    List<EventEntity> findEndedEventWithStatus(
+//            @Param("status") String status
+//    );
+
+//    @Query(value = """
+//            SELECT DISTINCT e FROM EventEntity e
+//            LEFT JOIN FETCH e.registrations
+//            WHERE function('timestamp', e.date) + (function('interval', '1 minute') * e.duration) < CURRENT_TIMESTAMP
+//            AND e.status = :status
+//            """)
+//    List<EventEntity> findEndedEventWithStatus(
+//            @Param("status") String status
+//    );
+
+    @Query("""
+            SELECT e.id FROM EventEntity e
+            WHERE e.locationId = :locationId AND e.date BETWEEN :dateBeginning AND :dateEnding
+            """)
+    List<Long> findEventsWhereDateIsBusy(Long locationId, OffsetDateTime dateBeginning, OffsetDateTime dateEnding);
+
+    Optional<EventEntity> findFirstByLocationIdAndDateBeforeOrderByDateDesc(Long locationId, OffsetDateTime dateBeginning);
 }

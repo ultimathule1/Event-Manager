@@ -22,6 +22,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 
@@ -51,14 +54,18 @@ public class EventService {
         this.retryableTaskService = retryableTaskService;
     }
 
+
+    //TODO: Проверка на то, чтобы нельзя было создать event в прошлом и прям сейчас.
+    //TODO: Нельзя, чтобы на одной локации создавались event в одно и то же время, или во время другого ивента
+    //TODO: При Update нужно сделать так, чтобы была аналогичная проверка
     public Event createEvent(EventCreateRequestDto eventCreateRequestDto) {
         User user = authenticationUserService.getAuthenticatedUser();
         if (!locationService.existsLocationById(eventCreateRequestDto.locationId())) {
-            throw new EntityNotFoundException("Location with this id=%s not found"
+            throw new EntityNotFoundException("Location with id=%s not found"
                     .formatted(eventCreateRequestDto.locationId()));
         }
 
-        EventEntity savedEventEntity = eventRepository.save(new EventEntity(
+        EventEntity eventEntityForSave = new EventEntity(
                 eventCreateRequestDto.name(),
                 eventCreateRequestDto.maxPlaces(),
                 eventCreateRequestDto.date(),
@@ -67,7 +74,12 @@ public class EventService {
                 eventCreateRequestDto.locationId(),
                 EventStatus.WAIT_START.name(),
                 user.id()
-        ));
+        );
+        validateCorrectDateEvent(eventEntityForSave);
+
+        EventEntity savedEventEntity = eventRepository.save(eventEntityForSave);
+
+
 
         Event savedEvent = mapperConfig.getMapper().map(savedEventEntity, Event.class);
 
@@ -141,6 +153,7 @@ public class EventService {
 
         Event beforeUpdateEvent = mapperConfig.getMapper().map(eventEntity, Event.class);
         updateEventEntityFromDto(eventEntity, eventUpdateRequestDto);
+        validateCorrectDateEvent(eventEntity);
         eventRepository.save(eventEntity);
         Event updatedEvent = mapperConfig.getMapper().map(eventEntity, Event.class);
 
@@ -207,6 +220,30 @@ public class EventService {
             if (location.capacity() != null && location.capacity() < dto.maxPlaces()) {
                 throw new IllegalArgumentException("The maximum number of event is more than location capacity");
             }
+        }
+    }
+
+    private void validateCorrectDateEvent(EventEntity event) {
+        var date = event.getDate();
+        if (!date.toLocalDateTime().isAfter(OffsetDateTime.now(ZoneOffset.UTC).toLocalDateTime())) {
+            throw new IllegalArgumentException("The event start date cannot be in the past");
+        }
+
+        var eventStartedBefore = eventRepository.findFirstByLocationIdAndDateBeforeOrderByDateDesc(event.getLocationId(), date);
+        var findEventIdsBusyDate = eventRepository.findEventsWhereDateIsBusy(
+                event.getLocationId(),
+                event.getDate(),
+                date.plusMinutes(event.getDuration()));
+
+        eventStartedBefore.ifPresent(e -> {
+            if (e.getDate().plusMinutes(e.getDuration()).isAfter(date)) {
+                throw new IllegalArgumentException("A certain event at location with id=" + event.getLocationId()
+                        + " is already underway at this time");
+            }
+        });
+
+        if (!findEventIdsBusyDate.isEmpty()) {
+            throw new IllegalArgumentException("Some events have already been booked for the selected time");
         }
     }
 }

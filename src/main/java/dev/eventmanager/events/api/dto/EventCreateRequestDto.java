@@ -19,7 +19,8 @@ public record EventCreateRequestDto(
         Integer maxPlaces,
         @NotNull
         @Future
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
+        //TODO:ПОДУМАТЬ ОБ ЭТОМ, ОСТАВИТЬ ИЛИ НЕТ
+        //@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
         OffsetDateTime date,
         @NotNull
         @PositiveOrZero
