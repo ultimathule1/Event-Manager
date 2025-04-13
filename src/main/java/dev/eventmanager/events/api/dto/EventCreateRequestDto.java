@@ -1,7 +1,5 @@
 package dev.eventmanager.events.api.dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -18,10 +16,10 @@ public record EventCreateRequestDto(
         @Positive
         Integer maxPlaces,
         @NotNull
-        @Future
+//        @Future
         //TODO:ПОДУМАТЬ ОБ ЭТОМ, ОСТАВИТЬ ИЛИ НЕТ
         //@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
-        OffsetDateTime date,
+        String date,
         @NotNull
         @PositiveOrZero
         BigDecimal cost,

@@ -22,7 +22,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
@@ -54,10 +53,10 @@ public class EventService {
         this.retryableTaskService = retryableTaskService;
     }
 
-
     //TODO: Проверка на то, чтобы нельзя было создать event в прошлом и прям сейчас.
     //TODO: Нельзя, чтобы на одной локации создавались event в одно и то же время, или во время другого ивента
     //TODO: При Update нужно сделать так, чтобы была аналогичная проверка
+    @Transactional
     public Event createEvent(EventCreateRequestDto eventCreateRequestDto) {
         User user = authenticationUserService.getAuthenticatedUser();
         if (!locationService.existsLocationById(eventCreateRequestDto.locationId())) {
@@ -65,10 +64,13 @@ public class EventService {
                     .formatted(eventCreateRequestDto.locationId()));
         }
 
+        DateTimeWithZone dateTimeZone = parseToCustomOffsetDateTime(eventCreateRequestDto.date());
+
         EventEntity eventEntityForSave = new EventEntity(
                 eventCreateRequestDto.name(),
                 eventCreateRequestDto.maxPlaces(),
-                eventCreateRequestDto.date(),
+                dateTimeZone.getOffsetDateTime(),
+                dateTimeZone.getZoneOffset(),
                 eventCreateRequestDto.cost(),
                 eventCreateRequestDto.duration(),
                 eventCreateRequestDto.locationId(),
@@ -79,8 +81,6 @@ public class EventService {
 
         EventEntity savedEventEntity = eventRepository.save(eventEntityForSave);
 
-
-
         Event savedEvent = mapperConfig.getMapper().map(savedEventEntity, Event.class);
 
         log.info("event created = {}", savedEvent);
@@ -88,10 +88,12 @@ public class EventService {
         return savedEvent;
     }
 
-    @Transactional
+//    @Transactional
     public Event getEventById(Long id) {
         EventEntity event = eventRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Event with id=%s not found".formatted(id)));
+        //addOffsetToTimeForDate(event);
+
         return mapperConfig
                 .getMapper()
                 .map(event, Event.class);
@@ -233,7 +235,8 @@ public class EventService {
         var findEventIdsBusyDate = eventRepository.findEventsWhereDateIsBusy(
                 event.getLocationId(),
                 event.getDate(),
-                date.plusMinutes(event.getDuration()));
+                date.plusMinutes(event.getDuration())
+        );
 
         eventStartedBefore.ifPresent(e -> {
             if (e.getDate().plusMinutes(e.getDuration()).isAfter(date)) {
@@ -246,4 +249,17 @@ public class EventService {
             throw new IllegalArgumentException("Some events have already been booked for the selected time");
         }
     }
+
+    private DateTimeWithZone parseToCustomOffsetDateTime(String date) {
+        if (date == null) {
+            throw new IllegalArgumentException("The date for parsing cannot be null");
+        }
+        return new DateTimeWithZone(OffsetDateTime.parse(date));
+    }
+
+//    private void addOffsetToTimeForDate(EventEntity eventEntity) {
+//        eventEntity.setDate(
+//                eventEntity.getDate().plusSeconds(eventEntity.getOffsetDate().getTotalSeconds())
+//        );
+//    }
 }

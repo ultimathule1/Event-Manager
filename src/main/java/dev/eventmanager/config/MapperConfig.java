@@ -18,6 +18,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.UUID;
 
 @Configuration
@@ -28,6 +30,7 @@ public class MapperConfig {
         ModelMapper mapper = new ModelMapper();
         mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
 
+        //TODO: поменять со смещением. СДЕЛАТЬ МЕТОД КОТОРЫЙ Возвращает getOffset из date
         mapper.createTypeMap(EventEntity.class, Event.class)
                 .setConverter(ctx -> new Event(
                         ctx.getSource().getId(),
@@ -37,6 +40,7 @@ public class MapperConfig {
                                 .map(e -> new RegistrationUserEvent(e.getId(), e.getUserId(), e.getEvent().getId()))
                                 .toList(),
                         ctx.getSource().getDate(),
+                        ctx.getSource().getOffsetDate(),
                         ctx.getSource().getDuration(),
                         ctx.getSource().getCost(),
                         ctx.getSource().getOwnerId(),
@@ -50,7 +54,7 @@ public class MapperConfig {
                         ctx.getSource().id(),
                         ctx.getSource().name(),
                         ctx.getSource().maxPlaces(),
-                        ctx.getSource().startDate(),
+                        convertToDate(ctx.getSource().startDate(), ctx.getSource().offsetDate()),
                         ctx.getSource().cost(),
                         ctx.getSource().registrations().size(),
                         ctx.getSource().duration(),
@@ -64,7 +68,7 @@ public class MapperConfig {
                         ctx.getSource().getId(),
                         ctx.getSource().getName(),
                         ctx.getSource().getMaxPlaces(),
-                        ctx.getSource().getDate(),
+                        convertToDate(ctx.getSource().getDate(), ctx.getSource().getOffsetDate()),
                         ctx.getSource().getCost(),
                         ctx.getSource().getRegistrations().size(),
                         ctx.getSource().getDuration(),
@@ -125,5 +129,9 @@ public class MapperConfig {
 
 
         return mapper;
+    }
+
+    private OffsetDateTime convertToDate(OffsetDateTime offsetDateTime, ZoneOffset zoneOffset) {
+        return OffsetDateTime.of(offsetDateTime.toLocalDateTime(), zoneOffset);
     }
 }
