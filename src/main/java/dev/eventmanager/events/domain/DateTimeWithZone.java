@@ -15,6 +15,10 @@ public class DateTimeWithZone {
         return offsetDateTime;
     }
 
+    public OffsetDateTime getDateTimeWithoutOffset() {
+        return offsetDateTime.withOffsetSameInstant(ZoneOffset.UTC);
+    }
+
     public ZoneOffset getZoneOffset() {
         return offsetDateTime.getOffset();
     }

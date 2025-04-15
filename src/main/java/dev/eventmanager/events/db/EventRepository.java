@@ -1,6 +1,5 @@
 package dev.eventmanager.events.db;
 
-import dev.eventmanager.events.domain.Event;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -86,37 +85,17 @@ public interface EventRepository extends JpaRepository<EventEntity, Long> {
 
     @EntityGraph(value = "Event.withRegistrations", type = EntityGraph.EntityGraphType.LOAD)
     @Query(value = """
-        SELECT e FROM EventEntity e
-        WHERE e.id IN :ids
-    """)
+                SELECT e FROM EventEntity e
+                WHERE e.id IN :ids
+            """)
     List<EventEntity> findAllWithRegistrations(@Param("ids") List<Long> ids);
 
-//    @EntityGraph(value = "Event.withRegistrations", type = EntityGraph.EntityGraphType.LOAD)
-//    @Query(value = """
-//            SELECT e
-//            FROM EventEntity e
-//            WHERE (e.date + (e.duration * INTERVAL '1 minute')) < CURRENT_TIMESTAMP
-//              AND e.status = :status
-//            """)
-//    List<EventEntity> findEndedEventWithStatus(
-//            @Param("status") String status
-//    );
-
-//    @Query(value = """
-//            SELECT DISTINCT e FROM EventEntity e
-//            LEFT JOIN FETCH e.registrations
-//            WHERE function('timestamp', e.date) + (function('interval', '1 minute') * e.duration) < CURRENT_TIMESTAMP
-//            AND e.status = :status
-//            """)
-//    List<EventEntity> findEndedEventWithStatus(
-//            @Param("status") String status
-//    );
-
     @Query("""
-            SELECT e.id FROM EventEntity e
-            WHERE e.locationId = :locationId AND e.date BETWEEN :dateBeginning AND :dateEnding
+            SELECT e FROM EventEntity e
+            WHERE e.locationId = :locationId AND (e.date BETWEEN :dateBeginning AND :dateEnding)
+            AND (:id IS NULL OR  e.id <> :id)
             """)
-    List<Long> findEventsWhereDateIsBusy(Long locationId, OffsetDateTime dateBeginning, OffsetDateTime dateEnding);
+    List<EventEntity> findEventsWhereDateIsBusyWithoutId(Long locationId, OffsetDateTime dateBeginning, OffsetDateTime dateEnding, Long id);
 
     Optional<EventEntity> findFirstByLocationIdAndDateBeforeOrderByDateDesc(Long locationId, OffsetDateTime dateBeginning);
 }

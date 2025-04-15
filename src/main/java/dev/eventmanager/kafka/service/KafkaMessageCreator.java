@@ -54,6 +54,7 @@ public class KafkaMessageCreator {
 
     private void updatesAllFields(Event eventBefore, Event eventAfter, EventChangerEvent message) {
         updateField(eventBefore.startDate(), eventAfter.startDate(), message::setFieldEventDate);
+        updateField(eventBefore.offsetDate(), eventAfter.offsetDate(), message::setFieldEventDateOffset);
         updateField(eventBefore.duration(), eventAfter.duration(), message::setFieldDuration);
         updateField(eventBefore.locationId(), eventAfter.locationId(), message::setFieldLocationId);
         updateField(eventBefore.name(), eventAfter.name(), message::setFieldEventName);

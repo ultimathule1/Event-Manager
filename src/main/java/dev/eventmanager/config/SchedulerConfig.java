@@ -26,6 +26,7 @@ import java.util.concurrent.CompletableFuture;
 @EnableScheduling
 @EnableAsync
 @ConditionalOnProperty(name = "scheduler.enabled", matchIfMissing = true)
+//TODO: ИЗМЕНИТЬ код, слишком много кода для шедулера. Возможно в отдельный сервис
 public class SchedulerConfig {
 
     private static final Logger log = LoggerFactory.getLogger(SchedulerConfig.class);
@@ -46,8 +47,7 @@ public class SchedulerConfig {
         this.mapperConfig = mapperConfig;
     }
 
-    //    @Scheduled(cron = "${scheduler.interval.cron.every-minute}")
-    @Scheduled(fixedRate = 10000)
+    @Scheduled(cron = "${scheduler.interval.cron.every-ten-seconds}")
     public void schedulerForCheckEventStatus() {
         log.info("the scheduler for changing the event status started");
         Instant before = Instant.now();
@@ -72,16 +72,6 @@ public class SchedulerConfig {
 
             logAndSendToKafka(startedEvent, EventStatus.STARTED, amountUpdates);
         }
-        //.map(ee -> mapperConfig.getMapper().map(ee, Event.class))
-        //.toList();
-
-//        startedEventsList
-//                .forEach(e -> {
-//                    eventRepository.updateEventStatusById(e.id(), EventStatus.STARTED.name());
-//                    Event eventAfter = mapperConfig.getMapper().map(ee, Event.class);
-//                    var messageEvent = kafkaEventMessageService.createEventMessageEvent(e, eventAfter, false);
-//                    retryableTaskService.createRetryableTask(messageEvent, RetryableTaskType.SEND_CREATE_NOTIFICATION_REQUEST);
-//                });
 
         return CompletableFuture.completedFuture(null);
     }
@@ -94,18 +84,6 @@ public class SchedulerConfig {
 
             logAndSendToKafka(endedEvent, EventStatus.FINISHED, amountUpdates);
         }
-//        List<Event> endedEventsList = eventsList
-//                .stream()
-//                .map(ee -> mapperConfig.getMapper().map(ee, Event.class))
-//                .toList();
-//
-//        endedEventsList
-//                .forEach(e -> {
-//                    EventEntity ee = eventRepository.updateEventStatusById(e.id(), EventStatus.FINISHED.name());
-//                    Event eventAfter = mapperConfig.getMapper().map(ee, Event.class);
-//                    var messageEvent = kafkaEventMessageService.createEventMessageEvent(e, eventAfter, false);
-//                    retryableTaskService.createRetryableTask(messageEvent, RetryableTaskType.SEND_CREATE_NOTIFICATION_REQUEST);
-//                });
 
         return CompletableFuture.completedFuture(null);
     }

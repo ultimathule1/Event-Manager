@@ -12,7 +12,10 @@ public class ZoneOffsetConverter implements AttributeConverter<ZoneOffset, Strin
         if (offset == null) {
             return null;
         }
-        return offset.toString();
+
+        String offsetCurrent = offset.toString();
+
+        return offsetCurrent.equals("Z") ? "+00:00" : offsetCurrent;
     }
 
     @Override

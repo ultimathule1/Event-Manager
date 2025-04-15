@@ -10,8 +10,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.NamedAttributeNode;
 import jakarta.persistence.NamedEntityGraph;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -74,6 +74,9 @@ public class EventEntity {
     @OneToMany(mappedBy = "event")
     private List<RegistrationUserEventEntity> registrations;
 
+    @Transient
+    private static final ZoneOffset DEFAULT_ZONE_OFFSET = ZoneOffset.of("+00:00");
+
     public EventEntity(String name, Integer maxPlaces, OffsetDateTime date, ZoneOffset offsetDate, BigDecimal cost, Integer duration, Long locationId, String status, Long ownerId) {
         this.name = name;
         this.maxPlaces = maxPlaces;
@@ -88,19 +91,19 @@ public class EventEntity {
     }
 
     public OffsetDateTime getDate() {
-        OffsetDateTime tempDate = OffsetDateTime.of(date.toLocalDateTime(), offsetDate);
+        OffsetDateTime tempDate = OffsetDateTime.of(date.toLocalDateTime(), DEFAULT_ZONE_OFFSET);
         return OffsetDateTime
                 .of(tempDate.plusSeconds(offsetDate.getTotalSeconds()).toLocalDateTime(), this.offsetDate);
     }
 
+    public OffsetDateTime getDateWithoutOffset() {
+        return OffsetDateTime.of(date.toLocalDateTime(), DEFAULT_ZONE_OFFSET);
+    }
+
     public void setDate(OffsetDateTime localDate) {
-        this.date = localDate.minusSeconds(localDate.getOffset().getTotalSeconds());
+        this.date = OffsetDateTime.of(localDate.minusSeconds(localDate.getOffset().getTotalSeconds())
+                .toLocalDateTime(), DEFAULT_ZONE_OFFSET);
         this.offsetDate = localDate.getOffset();
     }
 
-    @PrePersist
-    private void beforePersist() {
-        date = date.minusSeconds(offsetDate.getTotalSeconds());
-        date = OffsetDateTime.of(date.toLocalDateTime(), ZoneOffset.of("+00:00"));
-    }
 }

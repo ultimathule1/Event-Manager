@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.stereotype.Service;
 
+import java.math.RoundingMode;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
@@ -69,7 +70,7 @@ public class EventService {
         EventEntity eventEntityForSave = new EventEntity(
                 eventCreateRequestDto.name(),
                 eventCreateRequestDto.maxPlaces(),
-                dateTimeZone.getOffsetDateTime(),
+                dateTimeZone.getDateTimeWithoutOffset(),
                 dateTimeZone.getZoneOffset(),
                 eventCreateRequestDto.cost(),
                 eventCreateRequestDto.duration(),
@@ -88,7 +89,7 @@ public class EventService {
         return savedEvent;
     }
 
-//    @Transactional
+    //    @Transactional
     public Event getEventById(Long id) {
         EventEntity event = eventRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Event with id=%s not found".formatted(id)));
@@ -146,6 +147,8 @@ public class EventService {
             throw new AuthorizationDeniedException("You do not have permission to update this event");
         }
 
+        DateTimeWithZone dateTimeZone = parseToCustomOffsetDateTime(eventUpdateRequestDto.startDate());
+
         validateMaxPlaces(eventEntity, eventUpdateRequestDto);
 
         if ((eventUpdateRequestDto.maxPlaces() != null)
@@ -154,12 +157,10 @@ public class EventService {
         }
 
         Event beforeUpdateEvent = mapperConfig.getMapper().map(eventEntity, Event.class);
-        updateEventEntityFromDto(eventEntity, eventUpdateRequestDto);
+        updateEventEntityFromDto(eventEntity, eventUpdateRequestDto, dateTimeZone);
         validateCorrectDateEvent(eventEntity);
         eventRepository.save(eventEntity);
         Event updatedEvent = mapperConfig.getMapper().map(eventEntity, Event.class);
-
-//        kafkaEventMessageService.sendKafkaEventMessage(eventsTopicName,beforeUpdateEvent,updatedEvent, true);
 
         EventChangerEvent eventChanger = kafkaEventMessageService.createEventMessageEvent(beforeUpdateEvent, updatedEvent, true);
         retryableTaskService.createRetryableTask(eventChanger, RetryableTaskType.SEND_CREATE_NOTIFICATION_REQUEST);
@@ -196,11 +197,15 @@ public class EventService {
                 .toList();
     }
 
-    private void updateEventEntityFromDto(EventEntity eventEntity, EventUpdateRequestDto dto) {
+    private void updateEventEntityFromDto(EventEntity eventEntity, EventUpdateRequestDto dto, DateTimeWithZone dateTimeZone) {
         Optional.ofNullable(dto.eventName()).ifPresent(eventEntity::setName);
         Optional.ofNullable(dto.maxPlaces()).ifPresent(eventEntity::setMaxPlaces);
-        Optional.ofNullable(dto.startDate()).ifPresent(eventEntity::setDate);
-        Optional.ofNullable(dto.cost()).ifPresent(eventEntity::setCost);
+        Optional.ofNullable(dateTimeZone).ifPresent((date) -> {
+            eventEntity.setDate(date.getOffsetDateTime());
+        });
+        Optional.ofNullable(dto.cost())
+                .map(cost -> cost.setScale(2, RoundingMode.HALF_UP))
+                .ifPresent(eventEntity::setCost);
         Optional.ofNullable(dto.duration()).ifPresent(eventEntity::setDuration);
         Optional.ofNullable(dto.locationId()).ifPresent(eventEntity::setLocationId);
     }
@@ -227,21 +232,25 @@ public class EventService {
 
     private void validateCorrectDateEvent(EventEntity event) {
         var date = event.getDate();
-        if (!date.toLocalDateTime().isAfter(OffsetDateTime.now(ZoneOffset.UTC).toLocalDateTime())) {
+        var dateUTC = date.withOffsetSameInstant(ZoneOffset.UTC);
+        var offsetDateTimeNow = OffsetDateTime.now(ZoneOffset.UTC);
+
+        if (dateUTC.isBefore(offsetDateTimeNow)) {
             throw new IllegalArgumentException("The event start date cannot be in the past");
         }
 
         var eventStartedBefore = eventRepository.findFirstByLocationIdAndDateBeforeOrderByDateDesc(event.getLocationId(), date);
-        var findEventIdsBusyDate = eventRepository.findEventsWhereDateIsBusy(
+        var findEventIdsBusyDate = eventRepository.findEventsWhereDateIsBusyWithoutId(
                 event.getLocationId(),
-                event.getDate(),
-                date.plusMinutes(event.getDuration())
+                dateUTC,
+                dateUTC.plusMinutes(event.getDuration()),
+                event.getId()
         );
 
         eventStartedBefore.ifPresent(e -> {
-            if (e.getDate().plusMinutes(e.getDuration()).isAfter(date)) {
+            if (e.getDate().plusMinutes(e.getDuration()).isAfter(dateUTC)) {
                 throw new IllegalArgumentException("A certain event at location with id=" + event.getLocationId()
-                        + " is already underway at this time");
+                        + " is already booked at this time");
             }
         });
 
@@ -256,10 +265,4 @@ public class EventService {
         }
         return new DateTimeWithZone(OffsetDateTime.parse(date));
     }
-
-//    private void addOffsetToTimeForDate(EventEntity eventEntity) {
-//        eventEntity.setDate(
-//                eventEntity.getDate().plusSeconds(eventEntity.getOffsetDate().getTotalSeconds())
-//        );
-//    }
 }

@@ -10,6 +10,7 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 
 @Getter
@@ -30,6 +31,7 @@ public class EventChangerEvent {
     private FieldChange<String> fieldEventName;
     private FieldChange<BigDecimal> fieldEventCost;
     private FieldChange<OffsetDateTime> fieldEventDate;
+    private FieldChange<ZoneOffset> fieldEventDateOffset;
     private FieldChange<Integer> fieldMaxPlaces;
     private FieldChange<Integer> fieldDuration;
     private FieldChange<Long> fieldLocationId;
