@@ -2,7 +2,7 @@ package dev.eventmanager.retryable_task.db.repository;
 
 import dev.eventmanager.retryable_task.RetryableTaskStatus;
 import dev.eventmanager.retryable_task.RetryableTaskType;
-import dev.eventmanager.retryable_task.db.entities.RetryableTask;
+import dev.eventmanager.retryable_task.db.entities.RetryableTaskEntity;
 import jakarta.persistence.LockModeType;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Pageable;
@@ -15,23 +15,23 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
-public interface RetryableTaskRepository extends CrudRepository<RetryableTask, UUID> {
+public interface RetryableTaskRepository extends CrudRepository<RetryableTaskEntity, UUID> {
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("""
-            SELECT r FROM RetryableTask r where r.type = :type
+            SELECT r FROM RetryableTaskEntity r where r.type = :type
             AND r.retryTime <= :retryTime
             AND r.status = :status
             ORDER BY r.retryTime ASC
             """)
-    List<RetryableTask> findRetryableTaskForProcessing(RetryableTaskType type, Instant retryTime, RetryableTaskStatus status, Pageable pageable);
+    List<RetryableTaskEntity> findRetryableTaskForProcessing(RetryableTaskType type, Instant retryTime, RetryableTaskStatus status, Pageable pageable);
 
     @Query("""
-            UPDATE RetryableTask r SET r.status = :status WHERE r IN :retryableTasks
+            UPDATE RetryableTaskEntity r SET r.status = :status WHERE r IN :retryableTaskEntities
             """)
     @Modifying
     @Transactional
-    void updateRetryableTasks(List<RetryableTask> retryableTasks, RetryableTaskStatus status);
+    void updateRetryableTasks(List<RetryableTaskEntity> retryableTaskEntities, RetryableTaskStatus status);
 
     @Query(value = """
             DELETE FROM retryable_task r

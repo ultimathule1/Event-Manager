@@ -5,7 +5,7 @@ import dev.eventmanager.events.api.kafka.event.EventChangerEvent;
 import dev.eventmanager.retryable_task.RetryableTaskProperties;
 import dev.eventmanager.retryable_task.RetryableTaskStatus;
 import dev.eventmanager.retryable_task.RetryableTaskType;
-import dev.eventmanager.retryable_task.db.entities.RetryableTask;
+import dev.eventmanager.retryable_task.db.entities.RetryableTaskEntity;
 import dev.eventmanager.retryable_task.db.repository.RetryableTaskRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -25,31 +25,31 @@ public class RetryableTaskService {
     private final RetryableTaskProperties properties;
 
     @Transactional
-    public RetryableTask createRetryableTask(EventChangerEvent event, RetryableTaskType type) {
-        RetryableTask retryableTask = mapper.getMapper().map(event, RetryableTask.class);
-        retryableTask.setType(type);
-        return retryableTaskRepository.save(retryableTask);
+    public RetryableTaskEntity createRetryableTask(EventChangerEvent event, RetryableTaskType type) {
+        RetryableTaskEntity retryableTaskEntity = mapper.getMapper().map(event, RetryableTaskEntity.class);
+        retryableTaskEntity.setType(type);
+        return retryableTaskRepository.save(retryableTaskEntity);
     }
 
     @Transactional
-    public List<RetryableTask> getRetryableTasksForProcessing(RetryableTaskType type) {
+    public List<RetryableTaskEntity> getRetryableTasksForProcessing(RetryableTaskType type) {
         var currentTime = Instant.now();
         Pageable pageable = PageRequest.of(0, properties.getLimit());
-        List<RetryableTask> retryableTasks = retryableTaskRepository.findRetryableTaskForProcessing(
+        List<RetryableTaskEntity> retryableTaskEntities = retryableTaskRepository.findRetryableTaskForProcessing(
                 type, currentTime, RetryableTaskStatus.IN_PROGRESS, pageable
         );
 
         //Write retry time to the future so that another scheduler cannot work with the same data
-        for (RetryableTask retryableTask : retryableTasks) {
-            retryableTask.setRetryTime(currentTime.plus(Duration.ofSeconds(properties.getTimeoutInSeconds())));
+        for (RetryableTaskEntity retryableTaskEntity : retryableTaskEntities) {
+            retryableTaskEntity.setRetryTime(currentTime.plus(Duration.ofSeconds(properties.getTimeoutInSeconds())));
         }
 
-        return retryableTasks;
+        return retryableTaskEntities;
     }
 
     @Transactional
-    public void markRetryableTasksAsCompleted(List<RetryableTask> retryableTasks) {
-        retryableTaskRepository.updateRetryableTasks(retryableTasks, RetryableTaskStatus.SUCCESS);
+    public void markRetryableTasksAsCompleted(List<RetryableTaskEntity> retryableTaskEntities) {
+        retryableTaskRepository.updateRetryableTasks(retryableTaskEntities, RetryableTaskStatus.SUCCESS);
     }
 
     @Transactional

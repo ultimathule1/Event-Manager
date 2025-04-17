@@ -1,6 +1,6 @@
 package dev.eventmanager.retryable_task.service.processor;
 
-import dev.eventmanager.retryable_task.db.entities.RetryableTask;
+import dev.eventmanager.retryable_task.db.entities.RetryableTaskEntity;
 import dev.eventmanager.retryable_task.service.RetryableTaskService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,10 +18,10 @@ public abstract class AbstractRetryableTaskProcessor implements RetryableTaskPro
     private final ExecutorService cachedThreadPool = Executors.newCachedThreadPool();
 
     @Override
-    public void processRetryableTasks(List<RetryableTask> retryableTasks) {
+    public void processRetryableTasks(List<RetryableTaskEntity> retryableTaskEntities) {
         log.debug("Processing retryable tasks is started");
 
-        List<CompletableFuture<Pair<RetryableTask, Boolean>>> futures = retryableTasks.stream()
+        List<CompletableFuture<Pair<RetryableTaskEntity, Boolean>>> futures = retryableTaskEntities.stream()
                 .map(task -> CompletableFuture.supplyAsync(() -> {
                     log.debug("Processing retryable task with Id : {}", task.getId());
                     boolean success = processRetryableTask(task);
@@ -36,7 +36,7 @@ public abstract class AbstractRetryableTaskProcessor implements RetryableTaskPro
 
         CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
 
-        List<RetryableTask> successTasks = futures.stream()
+        List<RetryableTaskEntity> successTasks = futures.stream()
                 .map(CompletableFuture::join)
                 .filter(Pair::value)
                 .map(Pair::key)
@@ -50,7 +50,7 @@ public abstract class AbstractRetryableTaskProcessor implements RetryableTaskPro
         }
     }
 
-    protected abstract boolean processRetryableTask(RetryableTask retryableTask);
+    protected abstract boolean processRetryableTask(RetryableTaskEntity retryableTaskEntity);
 
     public record Pair<K, V>(K key, V value) {
     }

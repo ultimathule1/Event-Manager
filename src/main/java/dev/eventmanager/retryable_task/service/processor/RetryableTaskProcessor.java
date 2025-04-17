@@ -1,9 +1,9 @@
 package dev.eventmanager.retryable_task.service.processor;
 
-import dev.eventmanager.retryable_task.db.entities.RetryableTask;
+import dev.eventmanager.retryable_task.db.entities.RetryableTaskEntity;
 
 import java.util.List;
 
 public interface RetryableTaskProcessor {
-    void processRetryableTasks(List<RetryableTask> retryableTasks);
+    void processRetryableTasks(List<RetryableTaskEntity> retryableTaskEntities);
 }
