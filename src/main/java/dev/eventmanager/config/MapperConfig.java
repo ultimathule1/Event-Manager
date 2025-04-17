@@ -30,7 +30,6 @@ public class MapperConfig {
         ModelMapper mapper = new ModelMapper();
         mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
 
-        //TODO: поменять со смещением. СДЕЛАТЬ МЕТОД КОТОРЫЙ Возвращает getOffset из date
         mapper.createTypeMap(EventEntity.class, Event.class)
                 .setConverter(ctx -> new Event(
                         ctx.getSource().getId(),

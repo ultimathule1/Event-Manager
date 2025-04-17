@@ -54,9 +54,6 @@ public class EventService {
         this.retryableTaskService = retryableTaskService;
     }
 
-    //TODO: Проверка на то, чтобы нельзя было создать event в прошлом и прям сейчас.
-    //TODO: Нельзя, чтобы на одной локации создавались event в одно и то же время, или во время другого ивента
-    //TODO: При Update нужно сделать так, чтобы была аналогичная проверка
     @Transactional
     public Event createEvent(EventCreateRequestDto eventCreateRequestDto) {
         User user = authenticationUserService.getAuthenticatedUser();
@@ -89,11 +86,9 @@ public class EventService {
         return savedEvent;
     }
 
-    //    @Transactional
     public Event getEventById(Long id) {
         EventEntity event = eventRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Event with id=%s not found".formatted(id)));
-        //addOffsetToTimeForDate(event);
 
         return mapperConfig
                 .getMapper()
@@ -145,6 +140,11 @@ public class EventService {
         User currentUser = authenticationUserService.getAuthenticatedUser();
         if (currentUser.role() != UserRole.ADMIN && !currentUser.id().equals(eventEntity.getOwnerId())) {
             throw new AuthorizationDeniedException("You do not have permission to update this event");
+        }
+
+        if (eventEntity.getStatus().equals(EventStatus.STARTED.name())) {
+            throw new IllegalArgumentException("Event with id=" + id
+                    + " is already started. The event cannot be changed");
         }
 
         DateTimeWithZone dateTimeZone = parseToCustomOffsetDateTime(eventUpdateRequestDto.startDate());
@@ -249,6 +249,9 @@ public class EventService {
 
         eventStartedBefore.ifPresent(e -> {
             if (e.getDate().plusMinutes(e.getDuration()).isAfter(dateUTC)) {
+                if (e.getStatus().equals(EventStatus.STARTED.name())) {
+                    throw new IllegalArgumentException("For the time selected, an event is currently in progress");
+                }
                 throw new IllegalArgumentException("A certain event at location with id=" + event.getLocationId()
                         + " is already booked at this time");
             }

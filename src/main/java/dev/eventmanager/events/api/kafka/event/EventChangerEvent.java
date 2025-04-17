@@ -31,7 +31,7 @@ public class EventChangerEvent {
     private FieldChange<String> fieldEventName;
     private FieldChange<BigDecimal> fieldEventCost;
     private FieldChange<OffsetDateTime> fieldEventDate;
-    private FieldChange<ZoneOffset> fieldEventDateOffset;
+    private ZoneOffset offsetDate;
     private FieldChange<Integer> fieldMaxPlaces;
     private FieldChange<Integer> fieldDuration;
     private FieldChange<Long> fieldLocationId;

@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 
@@ -24,7 +23,6 @@ import java.util.concurrent.CompletableFuture;
 
 @Configuration
 @EnableScheduling
-@EnableAsync
 @ConditionalOnProperty(name = "scheduler.enabled", matchIfMissing = true)
 //TODO: ИЗМЕНИТЬ код, слишком много кода для шедулера. Возможно в отдельный сервис
 public class SchedulerConfig {
