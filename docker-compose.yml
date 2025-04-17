@@ -30,8 +30,6 @@ services:
       TZ: UTC
     ports:
       - "5433:5432"
-#    volumes:
-#      - ./data/postgres_event_notification:/var/lib/postgresql/data
 
   postgres_event_manager:
     image: postgres:17.2
@@ -41,5 +39,3 @@ services:
       TZ: UTC
     ports:
       - "9981:5432"
-#    volumes:
-#      - ./data/postgres_event_manager:/var/lib/postgresql/data
