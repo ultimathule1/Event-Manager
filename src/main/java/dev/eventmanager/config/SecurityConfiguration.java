@@ -1,5 +1,6 @@
-package dev.eventmanager.security;
+package dev.eventmanager.config;
 
+import dev.eventmanager.security.CustomUserDetails;
 import dev.eventmanager.security.exceptions.handlers.CustomAccessDeniedHandler;
 import dev.eventmanager.security.exceptions.handlers.CustomAuthenticationEntryPoint;
 import dev.eventmanager.security.jwt.JwtTokenFilter;
@@ -80,6 +81,13 @@ public class SecurityConfiguration {
                                 .requestMatchers(HttpMethod.POST, "/events/registrations/{id}")
                                 .hasAnyAuthority("USER")
 
+                                .requestMatchers("/css/**", "/js/**", "/img/**", "/lib/**", "/favicon.ico",
+                                        "/swagger-ui/**", "/v2/api-docs", "/v3/api-docs",
+                                        "/configuration/ui", "/swagger-resources/**",
+                                        "/configuration/security", "/swagger-ui.html",
+                                        "/webjars/**", "/v3/api-docs/swagger-config", "/openapi.yaml")
+                                .permitAll()
+
                                 .anyRequest().authenticated()
                 )
                 .exceptionHandling(exception -> {
@@ -113,22 +121,6 @@ public class SecurityConfiguration {
 
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
-        return web -> web.debug(true).ignoring()
-                .requestMatchers("/css/**",
-                        "/js/**",
-                        "/img/**",
-                        "/lib/**",
-                        "/favicon.ico",
-                        "/swagger-ui/**",
-                        "/v2/api-docs",
-                        "/v3/api-docs",
-                        "/configuration/ui",
-                        "/swagger-resources/**",
-                        "/configuration/security",
-                        "/swagger-ui.html",
-                        "/webjars/**",
-                        "/v3/api-docs/swagger-config",
-                        "/openapi.yaml"
-                );
+        return web -> web.debug(true);
     }
 }

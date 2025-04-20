@@ -41,8 +41,7 @@ public class UserController {
                 .body(userDtoMapper.toDto(createdUser));
     }
 
-    @GetMapping
-    @RequestMapping("/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<UserDto> getUserById(
             @PathVariable("id") Long id
     ) {
@@ -53,8 +52,7 @@ public class UserController {
                 .body(userDtoMapper.toDto(foundUser));
     }
 
-    @GetMapping
-    @RequestMapping("/auth")
+    @PostMapping("/auth")
     public ResponseEntity<JwtTokenResponse> authenticateUser(
             @RequestBody @Valid SignInRequest signInRequest
     ) {

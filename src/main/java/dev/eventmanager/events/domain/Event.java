@@ -4,6 +4,7 @@ import dev.eventmanager.events.registration.RegistrationUserEvent;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 
 public record Event(
@@ -11,6 +12,7 @@ public record Event(
         String name,
         List<RegistrationUserEvent> registrations,
         OffsetDateTime startDate,
+        ZoneOffset offsetDate,
         Integer duration,
         BigDecimal cost,
         Long ownerId,
@@ -18,4 +20,19 @@ public record Event(
         String status,
         Integer maxPlaces
 ) {
+    public Event(Event event) {
+        this(
+                event.id,
+                event.name(),
+                event.registrations(),
+                event.startDate(),
+                event.offsetDate(),
+                event.duration(),
+                event.cost(),
+                event.ownerId(),
+                event.locationId(),
+                event.status(),
+                event.maxPlaces()
+        );
+    }
 }

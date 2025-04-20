@@ -2,8 +2,8 @@ package dev.eventmanager.events.registrations;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import dev.eventmanager.RootTest;
-import dev.eventmanager.events.api.EventCreateRequestDto;
-import dev.eventmanager.events.api.EventDto;
+import dev.eventmanager.events.api.dto.EventCreateRequestDto;
+import dev.eventmanager.events.api.dto.EventDto;
 import dev.eventmanager.events.db.EventRepository;
 import dev.eventmanager.events.registration.RegistrationRepository;
 import dev.eventmanager.locations.Location;

@@ -1,6 +1,10 @@
 package dev.eventmanager.events.api;
 
 import dev.eventmanager.config.MapperConfig;
+import dev.eventmanager.events.api.dto.EventCreateRequestDto;
+import dev.eventmanager.events.api.dto.EventDto;
+import dev.eventmanager.events.api.dto.EventSearchRequestDto;
+import dev.eventmanager.events.api.dto.EventUpdateRequestDto;
 import dev.eventmanager.events.domain.Event;
 import dev.eventmanager.events.domain.EventService;
 import jakarta.validation.Valid;

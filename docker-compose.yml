@@ -1,0 +1,41 @@
+version: '3.7'
+
+services:
+  zookeeper-event-1:
+    image: confluentinc/cp-zookeeper:7.5.0
+    restart: always
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+    ports:
+      - "2181:2181"
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    restart: always
+    depends_on:
+      - zookeeper-event-1
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper-event-1:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    ports:
+      - "9092:9092"
+
+  postgres_event_notification:
+    image: postgres:17.2
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: root
+      TZ: UTC
+    ports:
+      - "5433:5432"
+
+  postgres_event_manager:
+    image: postgres:17.2
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: root
+      TZ: UTC
+    ports:
+      - "9981:5432"
