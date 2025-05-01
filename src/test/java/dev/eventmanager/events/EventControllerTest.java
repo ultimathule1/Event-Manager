@@ -107,7 +107,8 @@ public class EventControllerTest extends RootTest {
                         .now(ZoneOffset.UTC)
                         .plusMonths(9)
                         .minusDays(10)
-                        .withNano(0),
+                        .withNano(0)
+                        .toString(),
                 new BigDecimal(String.valueOf(1000)),
                 20,
                 savedLocation.id()
@@ -133,7 +134,8 @@ public class EventControllerTest extends RootTest {
                         .now(ZoneOffset.UTC)
                         .plusMonths(9)
                         .minusDays(10)
-                        .withNano(0),
+                        .withNano(0)
+                        .toString(),
                 new BigDecimal(String.valueOf(1000)),
                 100,
                 savedLocation.id() + 1L
@@ -229,7 +231,8 @@ public class EventControllerTest extends RootTest {
                         .now(ZoneOffset.UTC)
                         .plusMonths(8)
                         .plusDays(14)
-                        .withNano(0),
+                        .withNano(0)
+                        .toString(),
                 BigDecimal.valueOf(1000).setScale(2, RoundingMode.HALF_UP),
                 70,
                 savedLocation.id()
@@ -307,7 +310,8 @@ public class EventControllerTest extends RootTest {
                         .now(ZoneOffset.UTC)
                         .plusMonths(8)
                         .plusDays(14)
-                        .withNano(0),
+                        .withNano(0)
+                        .toString(),
                 BigDecimal.valueOf(1000).setScale(2, RoundingMode.HALF_UP),
                 70,
                 savedLocation.id()
@@ -333,7 +337,8 @@ public class EventControllerTest extends RootTest {
                         .now(ZoneOffset.UTC)
                         .plusMonths(8)
                         .plusDays(14)
-                        .withNano(0),
+                        .withNano(0)
+                        .toString(),
                 BigDecimal.valueOf(1000).setScale(2, RoundingMode.HALF_UP),
                 70,
                 savedLocation.id() + 1
@@ -405,7 +410,8 @@ public class EventControllerTest extends RootTest {
                         .now(ZoneOffset.UTC)
                         .plusMonths(2)
                         .minusDays(1)
-                        .withNano(0),
+                        .withNano(0)
+                        .toString(),
                 BigDecimal.valueOf(1000).setScale(2, RoundingMode.HALF_UP),
                 70,
                 savedLocation.id()
@@ -418,7 +424,8 @@ public class EventControllerTest extends RootTest {
                         .now(ZoneOffset.UTC)
                         .plusMonths(4)
                         .plusDays(14)
-                        .withNano(0),
+                        .withNano(0)
+                        .toString(),
                 BigDecimal.valueOf(1500).setScale(2, RoundingMode.HALF_UP),
                 65,
                 savedLocation2.id()
@@ -472,7 +479,8 @@ public class EventControllerTest extends RootTest {
                         .now(ZoneOffset.UTC)
                         .plusMonths(2)
                         .minusDays(1)
-                        .withNano(0),
+                        .withNano(0)
+                        .toString(),
                 BigDecimal.valueOf(1000).setScale(2, RoundingMode.HALF_UP),
                 70,
                 savedLocation.id()
@@ -485,7 +493,8 @@ public class EventControllerTest extends RootTest {
                         .now(ZoneOffset.UTC)
                         .plusMonths(4)
                         .plusDays(14)
-                        .withNano(0),
+                        .withNano(0)
+                        .toString(),
                 BigDecimal.valueOf(1500).setScale(2, RoundingMode.HALF_UP),
                 65,
                 savedLocation2.id()
@@ -544,7 +553,8 @@ public class EventControllerTest extends RootTest {
                         .now(ZoneOffset.UTC)
                         .plusMonths(9)
                         .minusDays(10)
-                        .withNano(0),
+                        .withNano(0)
+                        .toString(),
                 BigDecimal.valueOf(1000).setScale(2, RoundingMode.HALF_UP),
                 60,
                 locationId

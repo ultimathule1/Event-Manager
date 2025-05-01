@@ -150,7 +150,8 @@ public class EventRegistrationUsersControllerTest extends RootTest {
                         .now(ZoneOffset.UTC)
                         .plusMonths(6)
                         .minusDays(10)
-                        .withNano(0),
+                        .withNano(0)
+                        .toString(),
                 BigDecimal.valueOf(1000).setScale(2, RoundingMode.HALF_UP),
                 60,
                 savedLocation.id()
@@ -242,7 +243,8 @@ public class EventRegistrationUsersControllerTest extends RootTest {
                         .now(ZoneOffset.UTC)
                         .plusMonths(9)
                         .minusDays(10)
-                        .withNano(0),
+                        .withNano(0)
+                        .toString(),
                 BigDecimal.valueOf(1000).setScale(2, RoundingMode.HALF_UP),
                 60,
                 locationId
